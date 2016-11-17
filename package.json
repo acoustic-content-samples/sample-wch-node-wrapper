@@ -1,0 +1,29 @@
+{
+  "name": "wchnode",
+  "version": "0.0.1",
+  "private": false,
+  "main": "index.js",
+  "author": "Sven Sterbling <sterbling@de.ibm.com>",
+  "scripts": {
+    "start": "echo 'npm package'",
+    "test": "node node_modules/mocha/bin/mocha"
+  },
+  "dependencies": {
+    "async": "^2.1.2",
+    "bluebird": "^3.4.6",
+    "mime-types": "^2.1.12",
+    "request": "^2.75.0",
+    "request-promise": "^4.1.1"
+  },
+  "devDependencies": {
+    "mocha": "^3.1.2",
+    "should": "^11.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.ibm.com:sterbling/wch-node-sdk.git"
+  },
+  "engines": {
+    "node": "4.x"
+  }
+}
