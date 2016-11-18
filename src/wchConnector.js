@@ -114,7 +114,7 @@ class WchSDK {
         }
     });
     var loginstatus = rp(request).promise();
-    loginstatus.catch(console.error);
+    loginstatus.catch(() => console.log("Login failed..."));
     return loginstatus;
   }
 
