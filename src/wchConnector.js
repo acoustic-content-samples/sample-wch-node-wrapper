@@ -8,27 +8,28 @@
 /// and add common search patterns to the query.
 
 const rp = require('request-promise'),
-      Promise = require("bluebird"),
+      Promise = require('bluebird'),
       fs = Promise.promisifyAll(require('fs')),
       path = require('path'),
       crypto = require('crypto'),
       mime = require('mime-types');
 
-const errLogger = err => {console.error("Login expired... relogin. Err: ", err); throw err;}
+let debug = false;
+const errLogger = err => {if(debug){console.error("Login expired... relogin. Err: ", err);} throw err;}
 
 // Immutable connection endpoints to WCH.
 const connections = {
         authoring : {
-          baseUrl: 'https://dch-dxcloud.rtp.raleigh.ibm.com/api', 
+          baseUrl: 'https://www-stage.digitalexperience.ibm.com/api', 
           uri_search: '/authoring/v1/search',
           uri_auth: '/login/v1/basicauth',
           uri_resource: '/authoring/v1/resources',
           uri_assets: '/authoring/v1/assets'
         },
-         // At the moment there is no publish hence the endpoints are the same
-         // as in authoring
+         // At the moment there is no delivery system hence the endpoints are the same
+         // as in authoring... a future TODO
         publishing:  {
-          baseUrl: 'https://dch-dxcloud.rtp.raleigh.ibm.com/api',
+          baseUrl: 'https://www-stage.digitalexperience.ibm.com/api',
           uri_resource: '/authoring/v1/resources',
           uri_search: '/authoring/v1/search',
           uri_auth: '/authoring/v1/basicauth'
