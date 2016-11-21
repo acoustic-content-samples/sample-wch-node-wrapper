@@ -55,7 +55,7 @@ describe('WchConnector', function() {
 
   });
 
-  describe('#uploadResource', function() {
+  describe.only('#uploadResource', function() {
 
     it('should upload a resource', function() {
       this.timeout(20000);
@@ -95,7 +95,7 @@ describe('WchConnector', function() {
 
   });
 
-  describe.only('#deleteAsset', function() {
+  describe('#deleteAsset', function() {
     this.timeout(20000);
 
     it('should be able to delete an existing asset', function() {

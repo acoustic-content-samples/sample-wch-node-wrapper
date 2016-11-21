@@ -14,7 +14,7 @@ const rp = require('request-promise'),
       crypto = require('crypto'),
       mime = require('mime-types');
 
-let debug = false;
+let debug = true;
 const errLogger = err => {if(debug){console.error("Login expired... relogin. Err: ", err);} throw err;}
 
 // Immutable connection endpoints to WCH.
@@ -44,6 +44,7 @@ const connections = {
  */
 function send(options, retryHandling) {
   return rp(options)
+        .then(data => {console.log('Data', data); return data;})
         .catch(errLogger)
         .catch(err => retryHandling(err).then(() => rp(options)));
 }
@@ -153,7 +154,7 @@ class WchSDK {
   uploadResource(filePath, fileName) {
     if(this.configuration.endpoint !== 'authoring') new Error('Resource Upload not supported on delivery!');
     if(!filePath) new Error('Need a file to upload');
-    var _fileName = fileName || path.basename(filePath);
+    var _fileName = fileName || path.basename(filePath, path.extname(filePath));
     var contentType = mime.lookup(path.extname(filePath));
 
     return this.loginstatus.
@@ -167,7 +168,7 @@ class WchSDK {
             'Content-Type': contentType
           },
           qs: {
-            name: _fileName,
+            name: path.basename(filePath),
             md5: crypto.createHash('md5').update(fileBuffer).digest('base64')
           },
           body: fileBuffer,
