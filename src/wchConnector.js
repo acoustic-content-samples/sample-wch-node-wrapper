@@ -20,7 +20,7 @@ const errLogger = err => {if(debug){console.error("Login expired... relogin. Err
 // Immutable connection endpoints to WCH.
 const connections = {
         authoring : {
-          baseUrl: 'https://www-stage.digitalexperience.ibm.com/api', 
+          baseUrl: 'https://www.digitalexperience.ibm.com/api', 
           uri_search: '/authoring/v1/search',
           uri_auth: '/login/v1/basicauth',
           uri_resource: '/authoring/v1/resources',
@@ -29,7 +29,7 @@ const connections = {
          // At the moment there is no delivery system hence the endpoints are the same
          // as in authoring... a future TODO
         publishing:  {
-          baseUrl: 'https://www-stage.digitalexperience.ibm.com/api',
+          baseUrl: 'https://www.digitalexperience.ibm.com/api',
           uri_resource: '/authoring/v1/resources',
           uri_search: '/authoring/v1/search',
           uri_auth: '/authoring/v1/basicauth'
@@ -153,7 +153,7 @@ class WchSDK {
   uploadResource(filePath, fileName) {
     if(this.configuration.endpoint !== 'authoring') new Error('Resource Upload not supported on delivery!');
     if(!filePath) new Error('Need a file to upload');
-    var _fileName = fileName || path.basename(filePath, path.extname(filePath));
+    var _fileName = fileName || path.basename(filePath);
     var contentType = mime.lookup(path.extname(filePath));
 
     return this.loginstatus.
@@ -167,7 +167,7 @@ class WchSDK {
             'Content-Type': contentType
           },
           qs: {
-            name: path.basename(filePath),
+            name: _fileName,
             md5: crypto.createHash('md5').update(fileBuffer).digest('base64')
           },
           body: fileBuffer,

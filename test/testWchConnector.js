@@ -80,7 +80,7 @@ describe('WchConnector', function() {
 
   });
 
-  describe.only('#uploadAsset', function() {
+  describe('#uploadAsset', function() {
     this.timeout(20000);
 
     it('should be able to upload a new asset based on an new resource', function() {
@@ -90,7 +90,22 @@ describe('WchConnector', function() {
         description: 'This is kind of a test upload my dear',
         name: 'UploadAssetTest'
       }
-      return authSDK.uploadAsset(path.resolve('test', 'lab_services.jpg'), 'lab123', assetDef).then(console.log, console.err);
+      return authSDK.uploadAsset(path.resolve('test', 'lab_services.jpg'), 'lab123.jpg', assetDef).then(console.log, console.err);
+    });
+
+  });
+
+  describe.only('#deleteAsset', function() {
+    this.timeout(20000);
+
+    it('should be able to delete an existing asset', function() {
+      var assetDef = {
+        id: 'SvensUniqueAssetId2',
+        tags: {"values":['test', 'upload'],"declined":[],"analysis":"none"},
+        description: 'This is kind of a test upload my dear',
+        name: 'UploadAssetTest'
+      }
+      return authSDK.deleteAsset('SvensUniqueAssetId2').then(console.log, console.err);
     });
 
   });
