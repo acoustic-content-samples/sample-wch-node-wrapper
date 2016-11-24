@@ -44,7 +44,6 @@ const connections = {
  */
 function send(options, retryHandling) {
   return rp(options)
-        .then(data => {console.log('Data', data); return data;})
         .catch(errLogger)
         .catch(err => retryHandling(err).then(() => rp(options)));
 }
