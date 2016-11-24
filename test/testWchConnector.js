@@ -55,7 +55,7 @@ describe('WchConnector', function() {
 
   });
 
-  describe.only('#uploadResource', function() {
+  describe('#uploadResource', function() {
 
     it('should upload a resource', function() {
       this.timeout(20000);

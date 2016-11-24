@@ -182,13 +182,15 @@ class WchSDK {
   doQuery(queryParams) {
     var _query = queryParams.query || '*:*',
         _amount = queryParams.amount || 10,
-        _sort = queryParams.sort || '';
+        _sort = queryParams.sort || '',
+        _start = queryParams.start || 0;
     
     let request = Object.assign({
         qs: {
             q: _query,
             rows: _amount,
-            sort: _sort
+            sort: _sort,
+            start: _start
         }
     }, this.options);
 
@@ -224,13 +226,15 @@ class WchSDK {
     });
   }
 
-  getAllContentOfType(type, amount, sortAsc) {
+  getAllContentOfType(type, amount, sortAsc, start) {
     var _filter = (type) ? ' AND type:'+type : '',
         _sort = `lastModified ${(sortAsc) ? 'asc' : 'desc'}`;
+
     return this.doQuery({
       'query': `classification:content${_filter}`, 
       'amount': amount,
-      'sort': _sort
+      'sort': _sort,
+      'start': start
     });
   }
 
