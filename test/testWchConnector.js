@@ -110,4 +110,13 @@ describe('WchConnector', function() {
 
   });
 
+  describe.only('#deleteAssets', function() {
+    this.timeout(20000);
+
+    it('should be able to delete multiple existing assets', function() {
+      return authSDK.deleteAssets('tags:proto_wch_spa_simple').then(console.log, console.err);
+    });
+
+  });
+
 });

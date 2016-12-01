@@ -74,7 +74,8 @@ class WchSDK {
   constructor (configuration) {
     // Update default config
     this.configuration = Object.assign({
-      endpoint: 'publishing'
+      endpoint: 'publishing',
+      rejectUnauthorized: true
     }, configuration);
 
     var endpoint = connections[this.configuration.endpoint];
@@ -84,9 +85,8 @@ class WchSDK {
           baseUrl: `${endpoint.baseUrl}/${this.configuration.tenantid}`,
           uri: endpoint.uri_search,
           qsStringifyOptions: {encode:true},
-          // TODO: Remove after self-signed certificate gets removed
           agentOptions: {
-            rejectUnauthorized: false
+            rejectUnauthorized: this.configuration.rejectUnauthorized
           },
           jar: this.cookieJar,
           json: true
@@ -120,6 +120,7 @@ class WchSDK {
   }
 
   deleteAsset(assetId) {
+    console.log('Delete assets ', assetId);
     return this.loginstatus.
       then(() => Object.assign({}, 
         this.options, 
@@ -129,6 +130,16 @@ class WchSDK {
         })
       ).
       then(options => send(options, this.retryHandler));
+  }
+
+  deleteAssets(query) {
+    let amtEle = 100;
+    let qryParams = {query: `classification:asset`, facetquery: query, fields:'id', amount: amtEle};
+    return this.doQuery(qryParams).
+            then(data => (data.documents) ? data.documents : []).
+            map(documents => (documents.id.startsWith('asset:')) ? documents.id.substring('asset:'.length) : documents.id).
+            map(val => this.deleteAsset(val)).
+            all();
   }
 
   createAsset(assetDef) {
@@ -181,6 +192,8 @@ class WchSDK {
   // query, amount, sort
   doQuery(queryParams) {
     var _query = queryParams.query || '*:*',
+        _fields = queryParams.fields || '*',
+        _fq = queryParams.facetquery || '',
         _amount = queryParams.amount || 10,
         _sort = queryParams.sort || '',
         _start = queryParams.start || 0;
@@ -188,6 +201,8 @@ class WchSDK {
     let request = Object.assign({
         qs: {
             q: _query,
+            fl: _fields,
+            fq: _fq,
             rows: _amount,
             sort: _sort,
             start: _start
