@@ -24,7 +24,8 @@ const connections = {
           uri_search: '/authoring/v1/search',
           uri_auth: '/login/v1/basicauth',
           uri_resource: '/authoring/v1/resources',
-          uri_assets: '/authoring/v1/assets'
+          uri_assets: '/authoring/v1/assets',
+          uri_types: '/authoring/v1/types'
         },
          // At the moment there is no delivery system hence the endpoints are the same
          // as in authoring... a future TODO
@@ -187,6 +188,32 @@ class WchSDK {
       ).
       then(options => send(options, this.retryHandler)).
       then(() => {return {"id": _fileName}});
+  }
+
+  createContentType(typeDefition) {
+    return this.loginstatus.
+       then(() => Object.assign({},
+        this.options, 
+        {
+          uri: connections[this.configuration.endpoint].uri_types,
+          method: 'POST',
+          body: typeDefition
+        })
+      ).
+      then(options => send(options, this.retryHandler));
+  }
+
+  updateContentType(typeDefition) {
+    return this.loginstatus.
+       then(() => Object.assign({},
+        this.options, 
+        {
+          uri: connections[this.configuration.endpoint].uri_types+'/'+typeDefition.id,
+          method: 'PUT',
+          body: typeDefition
+        })
+      ).
+      then(options => send(options, this.retryHandler));
   }
 
   // query, amount, sort

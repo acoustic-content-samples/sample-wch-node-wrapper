@@ -110,7 +110,7 @@ describe('WchConnector', function() {
 
   });
 
-  describe.only('#deleteAssets', function() {
+  describe('#deleteAssets', function() {
     this.timeout(20000);
 
     it('should be able to delete multiple existing assets', function() {
@@ -118,5 +118,15 @@ describe('WchConnector', function() {
     });
 
   });
+
+  describe.only('#uploadContentType', function() {
+    this.timeout(20000);
+
+    it('should be able to upload a contenttype', function() {
+      return authSDK.createContentType(require('./contenttype')).then(console.log, console.err);
+    });
+
+  });
+
 
 });
