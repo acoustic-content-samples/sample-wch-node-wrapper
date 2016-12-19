@@ -271,26 +271,27 @@ class WchSDK {
 
   /**
    * Convinience method which uploads and creates a resource and afterwards an asset definition.
-   * @param  {String} filePath - Path to the file
-   * @param  {String} fileName - Name of the file
-   * @param  {Object} assetDef - The asset JSON definition
-   * @param  {String} assetDef.id - The id of the new assset
-   * @param  {Object} assetDef.tags - Tag structure of assets. Consists of active, declined and watson tags.
-   * @param  {Array}  assetDef.tags.values - String array with active tags for this asset. 
-   * @param  {Array}  assetDef.tags.declined - String array with declined tags for this asset.
-   * @param  {Array}  assetDef.tags.analysis - String array with tags from watson.
-   * @param  {String} assetDef.description - Description of the asset to be uploaded
-   * @param  {String} assetDef.name - The visible name of this asset for authoring UI.
-   * @param  {String} assetDef.resource - The resource ID to the binary file this asset references.
-   * @param  {Path}   assetDef.path - When this attribute is set the asset is handled as a web asset and not visible in the authoring UI.
+   * @param  {String} options - Options for asset upload.
+   * @param  {String} [options.filePath] - Path to the file
+   * @param  {String} [options.fileName] - Name of the file
+   * @param  {Object} [options.assetDef] - The asset JSON definition
+   * @param  {String} [options.assetDef.id] - The id of the new assset
+   * @param  {Object} [options.assetDef.tags] - Tag structure of assets. Consists of active, declined and watson tags.
+   * @param  {Array}  [options.assetDef.tags.values] - String array with active tags for this asset. 
+   * @param  {Array}  [options.assetDef.tags.declined] - String array with declined tags for this asset.
+   * @param  {Array}  [options.assetDef.tags.analysis] - String array with tags from watson.
+   * @param  {String} [options.assetDef.description] - Description of the asset to be uploaded
+   * @param  {String} [options.assetDef.name] - The visible name of this asset for authoring UI.
+   * @param  {String} [options.assetDef.resource] - The resource ID to the binary file this asset references.
+   * @param  {Path}   [options.assetDef.path] - When this attribute is set the asset is handled as a web asset and not visible in the authoring UI.
    * @return {Promise} - Resolves when the asset & resource is created
    */
-  uploadAsset(filePath, fileName, assetDef) {
+  uploadAsset(options) {
     if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
-    return this.createResource(filePath, fileName).
+    return this.createResource(options).
       then(resourceResp => {
-        assetDef.resource = resourceResp.id;
-        return assetDef;
+        options.assetDef.resource = resourceResp.id;
+        return options.assetDef;
       }).
       then(asset => this.createAsset(asset));
   }

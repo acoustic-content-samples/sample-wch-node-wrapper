@@ -55,7 +55,7 @@ describe('WchConnector', function() {
 
   });
 
-  describe.only('#uploadResource', function() {
+  describe('#uploadResource', function() {
 
     it('should upload a resource', function() {
       this.timeout(20000);
@@ -80,17 +80,23 @@ describe('WchConnector', function() {
 
   });
 
-  describe('#uploadAsset', function() {
+  describe.only('#uploadAsset', function() {
     this.timeout(20000);
 
     it('should be able to upload a new asset based on an new resource', function() {
-      var assetDef = {
-        id: 'TestUniqueId2',
-        tags: {"values":['test', 'upload'],"declined":[],"analysis":"none"},
-        description: 'This is kind of a test upload my dear',
-        name: 'UploadAssetTest'
+      let asset = {
+        filePath : path.resolve('test', 'contenttype.js'),
+        fileName : 'contenttype.js',
+        assetDef : {
+          id: 'ContentTypeTest',
+          tags: {"values":['test', 'upload'],"declined":[],"analysis":"none"},
+          description: 'This is kind of a test upload my dear',
+          name: 'ContentTypeTest'
+        }
       }
-      return authSDK.uploadAsset(path.resolve('test', 'lab_services_15.jpg'), 'lab15.jpg', assetDef).then(console.log, console.err);
+      return authSDK.
+        uploadAsset(asset).
+        then(console.log, console.err);
     });
 
   });
