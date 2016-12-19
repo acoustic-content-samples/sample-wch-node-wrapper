@@ -1,1 +1,2 @@
-module.exports = require('./src/wchConnector');
+const WCHConnector = require('./src/wchConnector');
+module.exports = WCHConnector;

@@ -55,11 +55,11 @@ describe('WchConnector', function() {
 
   });
 
-  describe('#uploadResource', function() {
+  describe.only('#uploadResource', function() {
 
     it('should upload a resource', function() {
       this.timeout(20000);
-      return authSDK.uploadResource(path.resolve('test', 'lab_services.jpg')).then(console.log, console.err);
+      return authSDK.createResource(path.resolve('test', 'lab_services_15.jpg'), 'qweretr.jpg', false).then(console.log, console.err);
     });
 
   });
@@ -85,12 +85,12 @@ describe('WchConnector', function() {
 
     it('should be able to upload a new asset based on an new resource', function() {
       var assetDef = {
-        id: 'SvensUniqueAssetId2',
+        id: 'TestUniqueId2',
         tags: {"values":['test', 'upload'],"declined":[],"analysis":"none"},
         description: 'This is kind of a test upload my dear',
         name: 'UploadAssetTest'
       }
-      return authSDK.uploadAsset(path.resolve('test', 'lab_services.jpg'), 'lab123.jpg', assetDef).then(console.log, console.err);
+      return authSDK.uploadAsset(path.resolve('test', 'lab_services_15.jpg'), 'lab15.jpg', assetDef).then(console.log, console.err);
     });
 
   });
@@ -114,12 +114,12 @@ describe('WchConnector', function() {
     this.timeout(20000);
 
     it('should be able to delete multiple existing assets', function() {
-      return authSDK.deleteAssets('tags:proto_wch_spa_simple').then(console.log, console.err);
+      return authSDK.deleteAssets('name:*Death*').then(console.log, console.err);
     });
 
   });
 
-  describe.only('#uploadContentType', function() {
+  describe('#uploadContentType', function() {
     this.timeout(20000);
 
     it('should be able to upload a contenttype', function() {

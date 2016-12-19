@@ -30,6 +30,7 @@ module.exports = {
           },
           "required": [
             "elementType",
+            
             "value"
           ],
           "additionalProperties": false
