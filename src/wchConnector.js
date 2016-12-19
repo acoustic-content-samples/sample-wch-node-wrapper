@@ -1,3 +1,12 @@
+/*
+ * Copyright 2016  IBM Corp.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an 
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+ * specific language governing permissions and limitations under the License.
+ */
 'use strict';
 //////////////////////////////
 // WCH Node API Connector
@@ -191,13 +200,13 @@ class WchSDK {
    */
   deleteAssets(query, amount) {
     if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
-    let parallelUploads = 10;
+    let parallelDeletes = 10;
     let amtEle = amount || 100;
     let qryParams = {query: `classification:asset`, facetquery: query, fields:'id', amount: amtEle};
     return this.doQuery(qryParams).
             then(data => (data.documents) ? data.documents : []).
             map(documents => (documents.id.startsWith('asset:')) ? documents.id.substring('asset:'.length) : documents.id).
-            then(docIds => Array(Math.ceil(docIds.length/parallelUploads)).fill().map((_,i) => docIds.slice(i*parallelUploads, i*parallelUploads+parallelUploads))).
+            then(docIds => Array(Math.ceil(docIds.length/parallelDeletes)).fill().map((_,i) => docIds.slice(i*parallelDeletes, i*parallelDeletes+parallelDeletes))).
             each(docIdChunk => Promise.resolve(docIdChunk).
                               map(doc => this.deleteAsset(doc)).
                               all()
