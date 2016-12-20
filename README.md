@@ -19,7 +19,7 @@ TODO
 ### Content Types
 TODO
 
-### Taxonomies
+### Taxonomies/ Categories
 TODO
 
 ## Delivery
