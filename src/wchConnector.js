@@ -149,8 +149,9 @@ class WchSDK {
     if(!options.filePath) new Error('Need a file to upload');
     let _randomId = options.randomId || false;
     let _fileName = options.fileName || options.filePath;
+    let extractedExtname = path.basename(_fileName, path.extname(_fileName));
     let contentType = mime.lookup(path.extname(options.filePath));
-    let resourceId = (_randomId) ? '' : '/'+path.basename(_fileName, path.extname(_fileName));
+    let resourceId = (_randomId) ? '' : `/${extractedExtname}`;
     return this.loginstatus.
       then(() => fs.readFileAsync(options.filePath)).
       then(fileBuffer => Object.assign({},
@@ -163,14 +164,14 @@ class WchSDK {
           },
           qs: {
             name: path.basename(options.filePath),
-            md5: (_randomId) ? '' : crypto.createHash('md5').update(fileBuffer).digest('base64')
+            md5: crypto.createHash('md5').update(fileBuffer).digest('base64')
           },
           body: fileBuffer,
           json: false
         })
       ).
       then(options => send(options, this.retryHandler)).
-      then(data => data || {"id": path.basename(_fileName, path.extname(_fileName))});
+      then(data => data || { id : extractedExtname });
   }
 
   /**
@@ -237,8 +238,8 @@ class WchSDK {
           uri: this.endpoint.uri_assets,
           method: 'POST',
           qs: {
-            analyze: true,
-            autocurate: true
+            analyze: true, // These two parameters define if watson tagging is active...
+            autocurate: false // ... and if all tags are accepted automatically
           },
           body: assetDef
         })
@@ -293,15 +294,24 @@ class WchSDK {
    * @param  {String} [options.assetDef.name] - The visible name of this asset for authoring UI.
    * @param  {String} [options.assetDef.resource] - The resource ID to the binary file this asset references.
    * @param  {Path}   [options.assetDef.path] - When this attribute is set the asset is handled as a web asset and not visible in the authoring UI.
+   * @param  {Array}  [options.assetDef.categoryIds] - String Array containing Categoriy IDs
    * @return {Promise} - Resolves when the asset & resource is created
    */
   uploadAsset(options) {
     if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
     return this.createResource(options).
-      then(resourceResp => {
-        options.assetDef.resource = resourceResp.id;
-        return options.assetDef;
-      }).
+      then(resourceResp => (typeof resourceResp === 'string') ? JSON.parse(resourceResp) : resourceResp).
+      then(resourceResp => Object.assign(
+        {},
+        options.assetDef, 
+        {
+          tags: { // Remember: Deep Cloning.
+            values:   options.assetDef.tags.values.splice(0),
+            declined: options.assetDef.tags.declined.splice(0),
+            analysis: options.assetDef.tags.analysis
+          },
+          resource: resourceResp.id
+        })).
       then(asset => this.createAsset(asset));
   }
 
@@ -360,19 +370,20 @@ class WchSDK {
         _sort = queryParams.sort || '',
         _start = queryParams.start || 0;
     
-    let request = Object.assign({},
-      this.options,
-      {
+    return this.loginstatus.
+      then(() => Object.assign({},
+        this.options,
+        {
           qs: {
-              q: _query,
-              fl: _fields,
-              fq: _fq,
-              rows: _amount,
-              sort: _sort,
-              start: _start
+            q: _query,
+            fl: _fields,
+            fq: _fq,
+            rows: _amount,
+            sort: _sort,
+            start: _start
           }
-      });
-    return this.loginstatus.then(() => send(request, this.retryHandler));
+        })).
+      then(options => send(options, this.retryHandler));
   }
 
   /*----------  Helper Methods for Queries  ----------*/

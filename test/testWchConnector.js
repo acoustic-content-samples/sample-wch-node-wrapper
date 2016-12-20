@@ -25,7 +25,7 @@ const authSDK = require('../index')({
           pwd: env.credentials.pwd
         }
       }),
-      publishSDK = require('../src/wchConnector')({
+      publishSDK = require('../index')({
         tenantid: env.credentials.tenantid
       });
 
@@ -68,7 +68,12 @@ describe('WchConnector', function() {
 
     it('should upload a resource', function() {
       this.timeout(20000);
-      return authSDK.createResource(path.resolve('test', 'lab_services_15.jpg'), 'qweretr.jpg', false).then(console.log, console.err);
+      let resource = {
+        filePath : path.resolve('test', 'contenttype.js'),
+        fileName : 'content.js',
+        randomId : true
+      }
+      return authSDK.createResource(resource).then(console.log, console.err);
     });
 
   });
@@ -89,18 +94,20 @@ describe('WchConnector', function() {
 
   });
 
-  describe('#uploadAsset', function() {
+  describe.only('#uploadAsset', function() {
     this.timeout(20000);
 
     it('should be able to upload a new asset based on an new resource', function() {
       let asset = {
-        filePath : path.resolve('test', 'contenttype.js'),
-        fileName : 'contenttype.js',
+        filePath : path.resolve('test', 'lab_services_15.jpg'),
+        fileName : 'lab_services_15.jpg',
+        randomId : true,
         assetDef : {
-          id: 'ContentTypeTest',
-          tags: {"values":['test', 'upload'],"declined":[],"analysis":"none"},
+          id: 'ContentTypeTestTest',
+          tags: {"values":['test', 'upload'],"declined":[], "analysis":"none"},
           description: 'This is kind of a test upload my dear',
-          name: 'ContentTypeTest'
+          name: 'ContentTypeTestTest',
+          categoryIds:["12fbc71263acc432dbeb5a31b5ce70af"]
         }
       }
       return authSDK.
