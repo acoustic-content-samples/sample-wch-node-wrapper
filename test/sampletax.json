@@ -1,0 +1,22 @@
+[ 
+  {
+    "name" : "mycooltesttax",
+    "childs": ["mycoolcat1", "mycoolcat2", "mycoolcat3"]
+  },
+  {
+    "parent": "mycoolcat1",
+    "childs": ["mycoolsubcat1"]
+  },
+  {
+    "parent": "mycoolcat3",
+    "childs": ["mycoolsubcat1"]
+  },
+  {
+    "parent": "mycoolsubcat1",
+    "childs": ["mycoolsubsubcat1", "mycoolsubsubcat2"]
+  },
+  {
+    "name" : "mycooltesttax2",
+    "childs": ["mycoolcat1", "mycoolcat2", "mycoolcat3"]
+  }
+]

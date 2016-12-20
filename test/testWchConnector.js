@@ -15,6 +15,7 @@
 const assert = require('assert');
 const should = require('should');
 const path = require('path');
+const fs = require('fs');
 
 const env = require('../.env');
 const authSDK = require('../index')({
@@ -94,7 +95,7 @@ describe('WchConnector', function() {
 
   });
 
-  describe.only('#uploadAsset', function() {
+  describe('#uploadAsset', function() {
     this.timeout(20000);
 
     it('should be able to upload a new asset based on an new resource', function() {
@@ -127,16 +128,16 @@ describe('WchConnector', function() {
         description: 'This is kind of a test upload my dear',
         name: 'UploadAssetTest'
       }
-      return authSDK.deleteAsset('SvensUniqueAssetId2').then(console.log, console.err);
+      return authSDK.deleteAsset('a8a100ce-7aa2-4c64-a05a-4f1e7f8b104e').then(console.log, console.err);
     });
 
   });
 
-  describe('#deleteAssets', function() {
+  describe.only('#deleteAssets', function() {
     this.timeout(20000);
 
     it('should be able to delete multiple existing assets', function() {
-      return authSDK.deleteAssets('name:*Death*').then(console.log, console.err);
+      return authSDK.deleteAssets('name:*Calendar*').then(console.log, console.err);
     });
 
   });
@@ -146,6 +147,55 @@ describe('WchConnector', function() {
 
     it('should be able to upload a contenttype', function() {
       return authSDK.createContentType(require('./contenttype')).then(console.log, console.err);
+    });
+
+  });
+
+  describe('#createCategory', function() {
+    this.timeout(20000);
+
+    it('should be able to create a new category', function() {
+      let categoryDef = {
+        name: "Yo!"
+      }
+      return authSDK.
+        createCategory(categoryDef).
+        then(console.log, console.err);
+    });
+
+  });
+
+  describe('#createTaxonomy', function() {
+    this.timeout(20000);
+
+    it('should be able to create a new taxonomy', function() {
+      let sampletax = JSON.parse(fs.readFileSync('./test/sampletax.json'));
+      return authSDK.
+        createTaxonomies(sampletax).
+        then(console.log, console.err);
+    });
+
+  });
+
+  describe('#deleteTaxonomy', function() {
+    this.timeout(20000);
+
+    it('should be able to delete a new taxonomy', function() {
+      return authSDK.
+        deleteTaxonomies('name:mycooltesttax').
+        then(console.log, console.err);
+    });
+
+  });
+
+
+  describe('#getCategoryTree', function() {
+    this.timeout(20000);
+
+    it('should be able to retrieve a complete taxonomy', function() {
+      return authSDK.
+        getCategoryTree('63b4f36de6e3c2a1116fbd837106a81d').
+        then(console.log, console.err);
     });
 
   });

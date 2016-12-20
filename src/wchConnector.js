@@ -77,7 +77,8 @@ class WchSDK {
     // Init config with default
     this.configuration = Object.assign({
       endpoint: 'publishing',
-      rejectUnauthorized: true
+      rejectUnauthorized: true,
+      maxSockets: 50
     }, configuration);
 
     this.endpoint = wchEndpoints[this.configuration.endpoint];
@@ -91,14 +92,21 @@ class WchSDK {
             rejectUnauthorized: this.configuration.rejectUnauthorized
           },
           jar: this.cookieJar,
-          json: true
+          json: true,
+          pool: {
+            maxSockets: this.configuration.maxSockets,
+            keepAlive: true
+          }
       };
 
     let creds = this.configuration.credentials;
     this.loginstatus = (creds) ? this.dologin(creds) : Promise.resolve();
 
     this.retryHandler = error => {
-      this.loginstatus = this.dologin(creds);
+      if(error.statusCode === '403') {
+        console.log('Auhtentication failed... try login again,');
+        this.loginstatus = this.dologin(creds);
+      }
       return this.loginstatus;
     };
   }
@@ -190,7 +198,8 @@ class WchSDK {
           method: 'DELETE'
         })
       ).
-      then(options => send(options, this.retryHandler));
+      then(options => send(options, this.retryHandler)).
+      catch((err) => console.log(err.message));
   }
 
   /**
@@ -201,17 +210,14 @@ class WchSDK {
    */
   deleteAssets(query, amount) {
     if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
-    let parallelDeletes = 10;
+    let parallelDeletes = Math.ceil(this.configuration.maxSockets / 5); // Use 1/5th of the connections in parallel
     let amtEle = amount || 100;
     let qryParams = {query: `classification:asset`, facetquery: query, fields:'id', amount: amtEle};
     return this.doQuery(qryParams).
             then(data => (data.documents) ? data.documents : []).
-            map(documents => (documents.id.startsWith('asset:')) ? documents.id.substring('asset:'.length) : documents.id).
+            map(document => (document.id.startsWith('asset:')) ? document.id.substring('asset:'.length) : document.id).
             then(docIds => Array(Math.ceil(docIds.length/parallelDeletes)).fill().map((_,i) => docIds.slice(i*parallelDeletes, i*parallelDeletes+parallelDeletes))).
-            each(docIdChunk => Promise.resolve(docIdChunk).
-                              map(doc => this.deleteAsset(doc)).
-                              all()
-            );
+            each(docIdChunk => Promise.all(docIdChunk.map(doc => this.deleteAsset(doc))));
   }
 
   /**
@@ -350,6 +356,132 @@ class WchSDK {
   }
 
   /**
+   * Returns a list of all child categories based on the given ID. The given ID is not included in the 
+   * searchresult.
+   * @param  {String}  categoryId - UUID of the category to search for
+   * @param  {Object}  config - Config on what to retrieve.
+   * @param  {Boolean} config.recurse - If true it will also include children of children, if false only direct childs are returned
+   * @param  {Number}  config.limit - How many items are returned max.
+   * @param  {Number}  config.offset - Where to start returning. Useful for pagination.   
+   * @return {Promse} - Resolves when the category tree was retrieved.
+   */
+  getCategoryTree(categoryId, config) {
+    if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
+    let _config = config || {};
+    let recurse = _config.recurse || true;
+    let limit = _config.limit || 100;
+    let offset = _config.offset || 0;
+
+    return this.loginstatus.
+      then(() => Object.assign({},
+        this.options, 
+        { uri: `${this.endpoint.uri_categories}/${categoryId}/children`,
+          method: 'GET',
+          qs: {
+            recurse: true,
+            limit: 100,
+            offset: 0
+          }
+        })
+      ).
+      then(options => send(options, this.retryHandler))
+  }
+
+  /**
+   * Creates a new category element. If the parent is empty this will
+   * create a taxonomy. 
+   * @param  {Object} categoryDef - The category definition
+   * @param  {String} [name] - The name of the category
+   * @param  {String} [parent] - The id of the parent category. 
+   * @return {Promise} - Resolves when the category was created
+   */
+  createCategory(categoryDef) {
+    if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
+    return this.loginstatus.
+      then(() => Object.assign({},
+        this.options, 
+        { uri: this.endpoint.uri_categories,
+          method: 'POST',
+          body: categoryDef
+        })).
+      then(options => send(options, this.retryHandler));
+  }
+
+  /**
+   * Deletes a category item all all its children.
+   * @param  {String} categoryId - The uniue id of the category item to delete
+   * @return {Promis} - Resolves when the element is deleted.
+   */
+  deleteCategory(categoryId) {
+    if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
+    return this.loginstatus.
+      then(() => Object.assign({},
+        this.options, 
+        { uri: `${this.endpoint.uri_categories}/${categoryId}`,
+          method: 'DELETE'
+        })
+      ).
+      then(options => send(options, this.retryHandler)).
+      catch((err) => console.log(err.message));
+  }
+
+  /* Convinience method to create taxonomies. */
+  createCategoryLvl(taxonomyLvl, categoryMap) {
+    if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
+    return new Promise((resolve, reject) => {
+      if(taxonomyLvl.name) {
+        this.createCategory({name:taxonomyLvl.name}).
+        then(result => categoryMap.set(taxonomyLvl.name, result.id)).
+        then(() => taxonomyLvl.childs).
+        map(child => this.createCategory({name:child, parent: categoryMap.get(taxonomyLvl.name)})).
+        map(result => categoryMap.set(result.name, result.id)).
+        then(resolve).
+        catch(reject); 
+      } else {
+        Promise.resolve(taxonomyLvl.childs).
+        map(child => this.createCategory({name:child, parent: categoryMap.get(taxonomyLvl.parent)})).
+        map(result => categoryMap.set(result.name, result.id)).
+        then(resolve).
+        catch(reject);
+      }
+    });
+  }
+
+  /**
+   * Creates a complete taxonomy based on a json definition file. It's also possible to define multiple 
+   * taxonomies in the same file. Make sure that the names are exclusive inside a single taxonomy. 
+   * @param  {Array}  taxonomyDefinition - Object Array. Each Object represents a level inside a taxonomy.
+   * @param  {Object} taxonomyLvl - Represents either the root of a taxonomy or a level inisde a taxonomy. Stored inside the taxonomyDefinition.
+   * @param  {String} name  - Indicates the start/name of a taxonomy. If name is present the parent attribute will be ignored.
+   * @param  {String} parent - Reference to the parent category. Will internally mapped to the category ID.
+   * @param  {Array} childs - String Array containing the names of the categories on this level. 
+   * @return {Promise} - Resolves when the taxonomy is completly created.
+   */
+  createTaxonomies(taxonomyDefinition) {
+    if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
+    let nameMap = new Map();
+    return Promise.resolve(taxonomyDefinition).
+    each(taxonomyLvl => this.createCategoryLvl(taxonomyLvl, nameMap));
+  }
+
+  /**
+   * Deletes all taxonomies matched by this query. If the query is empty all taxonomies will get deleted.
+   * @param  {String} query - A valid solr facet query element specifing the taxonomies to delete. 
+   * @param  {Number} amount - the amount of matched elements to get deleted.
+   * @return {Promise} - Resolves when all matched elements are deleted. 
+   */
+  deleteTaxonomies(query, amount) {
+    if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
+    let amtEle = amount || 100;
+    let qryParams = {query: 'classification:taxonomy', facetquery: query, fields:'id', amount: amtEle};
+    return this.doQuery(qryParams).
+      then(data => (data.documents) ? data.documents : []).
+      map(document => (document.id.startsWith('taxonomy:')) ? document.id.substring('taxonomy:'.length) : document.id).
+      map(id => this.deleteCategory(id)).
+      all();
+  }
+
+  /**
    * Search API access. This should be your go to point when retrieving ANYTHING from 
    * Content Hub. Why? Because Search API will be available on authoring and delivery soon.
    * Other convinience APIs like /authoring/v1/assets not so much. 
@@ -363,12 +495,12 @@ class WchSDK {
    * @return {Promise} - Resolves when the search finished.
    */
   doQuery(queryParams) {
-    let _query = queryParams.query || '*:*',
-        _fields = queryParams.fields || '*',
-        _fq = queryParams.facetquery || '',
-        _amount = queryParams.amount || 10,
-        _sort = queryParams.sort || '',
-        _start = queryParams.start || 0;
+    let _query = queryParams.query || '*:*';
+    let _fields = queryParams.fields || '*';
+    let _fq = queryParams.facetquery || '';
+    let _amount = queryParams.amount || 10;
+    let _sort = queryParams.sort || '';
+    let _start = queryParams.start || 0;
     
     return this.loginstatus.
       then(() => Object.assign({},
@@ -386,7 +518,7 @@ class WchSDK {
       then(options => send(options, this.retryHandler));
   }
 
-  /*----------  Helper Methods for Queries  ----------*/
+  /*----------  Convinience Methods for Search Queries  ----------*/
   
   getContentById(type, id, filter) {
     var _type = escapeSolrChars(type) || '',
@@ -402,9 +534,10 @@ class WchSDK {
     var _filter = (filter) ? ' '+filter : '',
         _sort = `lastModified ${(sortAsc) ? 'asc' : 'desc'}`;
     return this.doQuery({
-      'query': `*:*${_filter}`, 
-      'amount': amount,
-      'sort': _sort
+      query: '*:*',
+      facetquery: _filter, 
+      amount: amount,
+      sort: _sort
     });
   }
 
@@ -413,18 +546,18 @@ class WchSDK {
         _sort = `lastModified ${(sortAsc) ? 'asc' : 'desc'}`;
 
     return this.doQuery({
-      'query': `classification:content${_filter}`, 
-      'amount': amount,
-      'sort': _sort,
-      'start': start
+      query: `classification:content${_filter}`, 
+      amount: amount,
+      sort: _sort,
+      start: start
     });
   }
 
   getImageProfileWithName(name) {
     var _filter = (name) ? ' AND name:'+name : '';
     return this.doQuery({
-      'query': `classification:image-profile${_filter}`, 
-      'amount': 1
+      query: `classification:image-profile${_filter}`, 
+      amount: 1
     });
   }
 

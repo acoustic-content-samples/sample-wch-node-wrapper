@@ -14,7 +14,8 @@ module.exports = {
           uri_auth: '/login/v1/basicauth',
           uri_resource: '/authoring/v1/resources',
           uri_assets: '/authoring/v1/assets',
-          uri_types: '/authoring/v1/types'
+          uri_types: '/authoring/v1/types',
+          uri_categories: '/authoring/v1/categories'
         },
         publishing:  {
           baseUrl: 'https://my.digitalexperience.ibm.com/api',
