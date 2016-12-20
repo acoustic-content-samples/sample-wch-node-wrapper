@@ -7,10 +7,19 @@ TODO publish to npm
 ## Authoring
 Current support of authoring APIs is focused on resources, assets, authoring types and search. Future updates should allow to create content items, taxonomies and rendition profiles.
 
+### Search
+TODO
+
 ### Resource
 TODO
 
 ### Assets
+TODO
+
+### Content Types
+TODO
+
+### Taxonomies
 TODO
 
 ## Delivery
