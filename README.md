@@ -20,19 +20,29 @@ const wchConnector = require('wchnode')({
         maxSockets: 50
       });
 ```
-- `tenantid` - (Required) The Tenantid of your WCH Account you want to connect to. You can find the tenant id when you logged in into the WCH Authoring UI when clicking on the Info Button top left.
-- `endpoint` - (Optional) Choose the targeted endpoint. Either calls the authoring endpoint ('authoring') or the delivery endpoint ('publishing'). Default is 'publishing'.
-- `credentials` - (Optional) Used to authenticate towards content hub. Is always required when targeting the authoring endpoint. Default is anonymous.
-- `maxSockets` - Amount of max open connections. Default is 50.
-> *NOTE:* You can instantiate the connector multiple times for different usecases.
+- `tenantid` - [Required] The Tenantid of your WCH Account you want to connect to. You can find the tenant id when you logged in into the WCH Authoring UI when clicking on the Info Button top left.
+- `endpoint` - [Optional] Choose the targeted endpoint. Either calls the authoring endpoint ('authoring') or the delivery endpoint ('publishing'). Default is 'publishing'.
+- `credentials` - [Optional] Used to authenticate towards content hub. Is always required when targeting the authoring endpoint. Default is anonymous.
+- `maxSockets` - [Optional] Amount of max open connections. Default is 50.
+
+> **NOTE:** You can instantiate the connector multiple times for different usecases.
 
 ## Authoring
 Current support of authoring APIs is focused on resources, assets, authoring types and search. Future updates should allow to create content items, taxonomigites and rendition profiles.
+
+### Search
+TODO
 
 ### Resource
 TODO
 
 ### Assets
+TODO
+
+### Content Types
+TODO
+
+### Taxonomies/ Categories
 TODO
 
 ## Delivery
