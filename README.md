@@ -25,7 +25,7 @@ const wchConnector = require('wchnode')({
 - `credentials` - [Optional] Used to authenticate towards content hub. Is always required when targeting the authoring endpoint. Default is anonymous.
 - `maxSockets` - [Optional] Amount of max open connections. Default is 50.
 
-> **NOTE:** You can instantiate the connector multiple times for different usecases.
+> **NOTE:** You can instantiate the connector multiple times e.g. to access different tenants at the same time.
 
 ## Authoring
 Current support of authoring APIs is focused on resources, assets, authoring types and search. Future updates should allow to create content items, taxonomigites and rendition profiles.
@@ -43,6 +43,54 @@ TODO
 TODO
 
 ### Taxonomies/ Categories
+
+> `createCategory(categoryDef)`
+
+The taxonomy API is based around the simple category API endpoint. This allows you to create standalone categories based on the following definition:
+
+```json
+{
+  "name": "NAMEOFTHECATEGORY",
+  "parent": "PARENTCATEGORY"
+}
+
+```
+- `name` - [Required] The name of the category. Has to be unique in a taxonomy. (Hence can be used in multiple taxonomies)
+- `parent` - [Optional] - The parent category. If omitted this will create a new taxonomy with the name provided.
+
+> `createTaxonomies(taxonomyDefinition)`
+
+Creating a complete taxonomy is based on a simple json definition file. The definition consists of an array of taxonomy level definitions.
+
+```json
+[ 
+  {
+    "name" : "mycooltesttax",
+    "childs": ["mycoolcat1", "mycoolcat2", "mycoolcat3"]
+  },
+  {
+    "parent": "mycoolcat1",
+    "childs": ["mycoolsubcat1"]
+  },
+  {
+    "parent": "mycoolcat3",
+    "childs": ["mycoolsubcat1"]
+  },
+  {
+    "parent": "mycoolsubcat1",
+    "childs": ["mycoolsubsubcat1", "mycoolsubsubcat2"]
+  }
+]
+```
+- `name` - [Required] If you want to create the first level of a taxonomy including it's name.
+- `parent` - [Required] For all taxonomy levels below the root. Specifies the name of the parent category. 
+- `childs` - [Required] All categories that should be defined on this level.
+> **NOTE:** You could create multiple taxonomies in one definition. As soon as a new taxonomy is started make sure that all following category levels are targeted at the new taxonomy.
+
+> `deleteCategory(categoryId)`
+TODO
+
+> `deleteTaxonomies(query, amount)`
 TODO
 
 ## Delivery

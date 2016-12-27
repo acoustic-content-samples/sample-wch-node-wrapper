@@ -14,9 +14,5 @@
   {
     "parent": "mycoolsubcat1",
     "childs": ["mycoolsubsubcat1", "mycoolsubsubcat2"]
-  },
-  {
-    "name" : "mycooltesttax2",
-    "childs": ["mycoolcat1", "mycoolcat2", "mycoolcat3"]
   }
 ]
