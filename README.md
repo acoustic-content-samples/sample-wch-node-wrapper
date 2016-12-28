@@ -31,18 +31,40 @@ const wchConnector = require('wchnode')({
 Current support of authoring APIs is focused on resources, assets, authoring types and search. Future updates should allow to create content items, taxonomigites and rendition profiles.
 
 ### Search
+
 TODO
+
+---
 
 ### Resource
+
 TODO
+
+---
 
 ### Assets
+
 TODO
+
+---
 
 ### Content Types
+
 TODO
 
+---
+
 ### Taxonomies/ Categories
+
+> `getCategoryTree(categoryId, config)`
+
+Query method to get the tree of sub categories based on a starting category. A good usecase would be to get a whole taxonmy based on the starting category id.
+- `categoryId` - [Required] The ID of the category from where to retrieve the children
+- `config.recurse` - [Optional] If true it will also include children of children, if false only direct childs are returned. Defaults to true.
+- `config.limit` - [Optional] How many children are maximal returned. Default is *100*.
+- `config.offset` - [Optional] Where to start returning the children. Useful to return subtrees. Defaults to 0.
+
+---
 
 > `createCategory(categoryDef)`
 
@@ -57,6 +79,8 @@ The taxonomy API is based around the simple category API endpoint. This allows y
 ```
 - `name` - [Required] The name of the category. Has to be unique in a taxonomy. (Hence can be used in multiple taxonomies)
 - `parent` - [Optional] - The parent category. If omitted this will create a new taxonomy with the name provided.
+
+---
 
 > `createTaxonomies(taxonomyDefinition)`
 
@@ -87,11 +111,19 @@ Creating a complete taxonomy is based on a simple json definition file. The defi
 - `childs` - [Required] All categories that should be defined on this level.
 > **NOTE:** You could create multiple taxonomies in one definition. As soon as a new taxonomy is started make sure that all following category levels are targeted at the new taxonomy.
 
+---
+
 > `deleteCategory(categoryId)`
-TODO
+
+Deletes a category based on it's it. Will also delete all subcategories. Hence if you want to delete a taxonomy delete the root category.
+
+---
 
 > `deleteTaxonomies(query, amount)`
-TODO
+
+Convienience method which can be used to delete one or multiple taxonomies based on a search query. For details on how to define a query have a look at the search section.
+
+---
 
 ## Delivery
 TODO. Idea is to have two options. 
