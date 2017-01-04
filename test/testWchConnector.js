@@ -32,7 +32,7 @@ const authSDK = require('../index')({
 
 describe('WchConnector', function() {
 
-  describe('#init(config)', function() {
+  describe.only('#init(config)', function() {
     
     it('should initalize against publishing if configuration.endpoint is set to authoring', function() {
       (authSDK.isPublishContext()).should.be.false();
@@ -55,6 +55,18 @@ describe('WchConnector', function() {
             .should.eventually.not.be.null()
             .and.be.an.instanceOf(Object)
             .and.have.properties(['numFound', 'documents']);
+    });
+
+    it('should perform a complex query.' , function() {
+      this.timeout(20000);
+      return authSDK.doQuery({
+        query : '*:*',
+        fields: 'creator, lastModified, classification',
+        facetquery : ['classification:asset', 'lastModified:[2016-12-20T09:15:25.882Z TO NOW]'],
+        amount : 30,
+        sort : 'creator asc, lastModified desc',
+        start : 5
+      }).then(console.log);
     });
 
   });
@@ -133,7 +145,7 @@ describe('WchConnector', function() {
 
   });
 
-  describe.only('#deleteAssets', function() {
+  describe('#deleteAssets', function() {
     this.timeout(20000);
 
     it('should be able to delete multiple existing assets', function() {

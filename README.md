@@ -28,11 +28,34 @@ const wchConnector = require('wchnode')({
 > **NOTE:** You can instantiate the connector multiple times e.g. to access different tenants at the same time.
 
 ## Authoring
-Current support of authoring APIs is focused on resources, assets, authoring types and search. Future updates should allow to create content items, taxonomigites and rendition profiles.
+Current support of authoring APIs is focused on resources, assets, authoring types and search. Future updates should allow to create content items, taxonomies and rendition profiles. Please note that you should only use the authoring APIs for authoring and never for content retrieval in production use cases with high amounts of traffic.
 
 ### Search
 
-TODO
+> `doQuery(queryParams)`
+
+Performs a search against all content on the authoring environment. The query is based on Solr[SolrQry]. Hence you can have a look at their documentation for further information on how to create a valid query. Make sure to escape your query properly. Have a look at the simple helper method `escapeSolrChars` on how to do so.
+
+[SolrQry]: https://cwiki.apache.org/confluence/display/solr/Query+Syntax+and+Parsing
+
+```javascript
+WCHConnector.doQuery({
+        query : '*:*',
+        fields: 'creator, lastModified, classification',
+        facetquery : ['classification:asset', 'lastModified:[2016-12-20T09:15:25.882Z TO NOW]'],
+        amount : 30,
+        sort : 'creator asc, lastModified desc',
+        start : 5
+      });
+```
+
+- `queryParams` - [Required] The search query.
+- `queryParams.query` - [Optional] The main query. Must be a valid Solr query. Defaults to query for all content.  
+- `queryParams.fields` - [Optional] Comma separated list of fiels to get returned in the search result. Default are all fields.
+- `queryParams.facetquery` - [Optional] Subquery performed on the results of the main query. The input can also be an array containing multiple facet queries.
+- `queryParams.amount` - [Optional] The amount of documents that will be returned in the search result. Defaults to 10 documents matching the query.
+- `queryParams.sort` - [Optional] Define a valid Solr sort criteria based on a valid index. Can also contain multiple indexes. Sortable either asc (ascending) or desc (descending)
+- `queryParams.start` - [Optional] The starting point after sorting from where to return the number of elements defined in `amount`. Default starting point is index 0. 
 
 ---
 
@@ -70,12 +93,11 @@ Query method to get the tree of sub categories based on a starting category. A g
 
 The taxonomy API is based around the simple category API endpoint. This allows you to create standalone categories based on the following definition:
 
-```json
-{
-  "name": "NAMEOFTHECATEGORY",
-  "parent": "PARENTCATEGORY"
-}
-
+```javascript
+WCHConnector.createCategory({
+  name: "NAMEOFTHECATEGORY",
+  parent: "PARENTCATEGORY"
+});
 ```
 - `name` - [Required] The name of the category. Has to be unique in a taxonomy. (Hence can be used in multiple taxonomies)
 - `parent` - [Optional] - The parent category. If omitted this will create a new taxonomy with the name provided.

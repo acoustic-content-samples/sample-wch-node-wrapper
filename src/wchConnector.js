@@ -513,7 +513,8 @@ class WchSDK {
             rows: _amount,
             sort: _sort,
             start: _start
-          }
+          },
+          useQuerystring: true
         })).
       then(options => send(options, this.retryHandler));
   }
