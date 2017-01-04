@@ -30,11 +30,41 @@ const wchConnector = require('wchnode')({
 ## Authoring
 Current support of authoring APIs is focused on resources, assets, authoring types and search. Future updates should allow to create content items, taxonomies and rendition profiles. Please note that you should only use the authoring APIs for authoring and never for content retrieval in production use cases with high amounts of traffic.
 
+### Authentication
+
+> `doLogin(credentials)`
+
+This method is normally hidden when using this sample. However I want to talk about the two ways (GET or POST) of authentication towards WCH. If you have a look at the code you will see that in this sample the GET path is implemented. Since both methods do exactly the same thing it's just a matter of preference which way you want to use. What are the details you should consider when implementing your own authentication?
+
+**GET**
+
+The GET path is based around basic authentication. Make sure to encode your username and password in the authorization header.
+
+```http
+GET https://my.digitalexperience.ibm.com/api/login/v1/basicauth
+Headers:
+  Authorization: Basic Base64[USERNAME:PASSWORD]
+```
+
+**POST**
+
+The POST path requires no headers but instead you send your credentials in the body which has to be application/x-www-form-urlencoded.
+
+```http
+POST https://my.digitalexperience.ibm.com/api/login/v1/basicauth
+Headers:
+  Content-Type: application/x-www-form-urlencoded
+Body:
+   j_username=<USERNAME>&j_password=<PASSWORD>
+```
+
+---
+
 ### Search
 
 > `doQuery(queryParams)`
 
-Performs a search against all content on the authoring environment. The query is based on Solr[SolrQry]. Hence you can have a look at their documentation for further information on how to create a valid query. Make sure to escape your query properly. Have a look at the simple helper method `escapeSolrChars` on how to do so.
+Performs a search against all content on the authoring environment. The query is based [on Solr][SolrQry]. Hence you can have a look at their documentation for further information on how to create a valid query. Make sure to escape your query properly. Have a look at the simple helper method `escapeSolrChars` on how to do so.
 
 [SolrQry]: https://cwiki.apache.org/confluence/display/solr/Query+Syntax+and+Parsing
 
@@ -49,7 +79,7 @@ WCHConnector.doQuery({
       });
 ```
 
-- `queryParams` - [Required] The search query.
+- `queryParams` - [Required] The search query object passed into the method.
 - `queryParams.query` - [Optional] The main query. Must be a valid Solr query. Defaults to query for all content.  
 - `queryParams.fields` - [Optional] Comma separated list of fiels to get returned in the search result. Default are all fields.
 - `queryParams.facetquery` - [Optional] Subquery performed on the results of the main query. The input can also be an array containing multiple facet queries.
