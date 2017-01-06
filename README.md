@@ -91,7 +91,24 @@ WCHConnector.doQuery({
 
 ### Resource
 
-TODO
+Resources are not directly visible in the authoring UI since resources are mainly a technical concept. Every asset references a resource by it's unique id. Hence you can think of a resource as the actual binary that is stored in WCH and an asset are specific metadata describing and referencing a resource. **NOTE:** If you study the public APIs closely you will see that there is no DELETE endpoint for resources. This is because resources will get autocleaned periodically by WCH if there are no more assets which are referencing the resource.
+
+> `createResource(resourceDef)`
+
+Uploads a resource to WCH. Make sure to link the resource to an asset afterwards. Be aware that the binaries of a resource can't get updated here. It's only possible to update metadata of resources. For use cases requiring an update have a look at the assets section. 
+
+```javascript
+WCHConnector.createResource({
+        filePath : 'Absolute/Path/To/YourFileToUpload.jpeg',
+        fileName : 'nameinwch.whateveryoulike',
+        randomId : true
+      });
+```
+
+- `resourceDef` - [Required] The definition of an resource to upload.
+- `resourceDef.filePath` - [Required] An absolute path to a file that should be uploaded to WCH as a resource. 
+- `resourceDef.fileName` - [Optional] Set a WCH specific name for this resource. This name will be shown in the authoring UI for this resource. Default is the filename.
+- `resourceDef.randomId` - [Optional] If random ID is true a generic UUID is given as an ID to the resource, otherwise the filename will be uses as the unique ID. (Hence be careful with naming colissions) Default is true.
 
 ---
 
@@ -117,8 +134,6 @@ Query method to get the tree of sub categories based on a starting category. A g
 - `config.limit` - [Optional] How many children are maximal returned. Default is *100*.
 - `config.offset` - [Optional] Where to start returning the children. Useful to return subtrees. Defaults to 0.
 
----
-
 > `createCategory(categoryDef)`
 
 The taxonomy API is based around the simple category API endpoint. This allows you to create standalone categories based on the following definition:
@@ -131,8 +146,6 @@ WCHConnector.createCategory({
 ```
 - `name` - [Required] The name of the category. Has to be unique in a taxonomy. (Hence can be used in multiple taxonomies)
 - `parent` - [Optional] - The parent category. If omitted this will create a new taxonomy with the name provided.
-
----
 
 > `createTaxonomies(taxonomyDefinition)`
 
@@ -163,13 +176,9 @@ Creating a complete taxonomy is based on a simple json definition file. The defi
 - `childs` - [Required] All categories that should be defined on this level.
 > **NOTE:** You could create multiple taxonomies in one definition. As soon as a new taxonomy is started make sure that all following category levels are targeted at the new taxonomy.
 
----
-
 > `deleteCategory(categoryId)`
 
 Deletes a category based on it's it. Will also delete all subcategories. Hence if you want to delete a taxonomy delete the root category.
-
----
 
 > `deleteTaxonomies(query, amount)`
 
