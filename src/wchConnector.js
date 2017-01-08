@@ -298,14 +298,13 @@ class WchSDK {
    * @param  {Array}  [options.assetDef.tags.analysis] - String array with tags from watson.
    * @param  {String} [options.assetDef.description] - Description of the asset to be uploaded
    * @param  {String} [options.assetDef.name] - The visible name of this asset for authoring UI.
-   * @param  {String} [options.assetDef.resource] - The resource ID to the binary file this asset references.
    * @param  {Path}   [options.assetDef.path] - When this attribute is set the asset is handled as a web asset and not visible in the authoring UI.
    * @param  {Array}  [options.assetDef.categoryIds] - String Array containing Categoriy IDs
    * @return {Promise} - Resolves when the asset & resource is created
    */
   uploadAsset(options) {
     if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
-    return this.createResource(options).
+    return this.createResource(options.resourceDef).
       then(resourceResp => (typeof resourceResp === 'string') ? JSON.parse(resourceResp) : resourceResp).
       then(resourceResp => Object.assign(
         {},
@@ -319,6 +318,27 @@ class WchSDK {
           resource: resourceResp.id
         })).
       then(asset => this.createAsset(asset));
+  }
+
+  /**
+   * Getter for content type definitions. Simple wrapper around search API. 
+   * All params allowed as in doQuery except for query which is predefined.
+   * @param  {Object} queryParams - The params object to build a query. Not all params are supported yet!
+   * @param  {String} queryParams.fields - The fields returned from the search. Default are all fields.
+   * @param  {String} queryParams.facetquery - Query to filter the main result. Cachable. Default is none.
+   * @param  {Number} queryParams.amount - Amount of results returned. Default is 10 elements.
+   * @param  {String} queryParams.sort - The order in which results are returned.
+   * @param  {Number} queryParams.start - The first element in order to be returned.
+   * @return {Promise} - Resolves when the search finished.
+   */
+  getContentTypeDefinitions(options) {
+    let searchQry = Object.
+      assign(
+        {}, 
+        options, 
+        {query: 'classification:content-type'}
+      );
+    return this.doQuery(searchQry);
   }
 
   /**
@@ -341,6 +361,14 @@ class WchSDK {
       then(options => send(options, this.retryHandler));
   }
 
+  /**
+   * Updates an existing content type. If somebody alters the definition 
+   * before you update your changes this method fails. You can only update
+   * the most current version known to WCH. Recommendation: Use authoring UI. A content type
+   * becomes complicated fast!
+   * @param  {Object} typeDefinition - JSON Object representing the content type definition
+   * @return {Promise} - Resolves when the content type is updated
+   */
   updateContentType(typeDefinition) {
     if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
     return this.loginstatus.
@@ -486,12 +514,12 @@ class WchSDK {
    * Content Hub. Why? Because Search API will be available on authoring and delivery soon.
    * Other convinience APIs like /authoring/v1/assets not so much. 
    * @param  {Object} queryParams - The params object to build a query. Not all params are supported yet!
-   * @param  {String} query - The main query. Must be a valid SOLR query. Required. Default is all content.
-   * @param  {String} fields - The fields returned from the search. Default are all fields.
-   * @param  {String} facetquery - Query to filter the main result. Cachable. Default is none.
-   * @param  {Number} amount - Amount of results returned. Default is 10 elements.
-   * @param  {String} sort - The order in which results are returned.
-   * @param  {Number} start - The first element in order to be returned.
+   * @param  {String} queryParams.query - The main query. Must be a valid SOLR query. Required. Default is all content.
+   * @param  {String} queryParams.fields - The fields returned from the search. Default are all fields.
+   * @param  {String} queryParams.facetquery - Query to filter the main result. Cachable. Default is none.
+   * @param  {Number} queryParams.amount - Amount of results returned. Default is 10 elements.
+   * @param  {String} queryParams.sort - The order in which results are returned.
+   * @param  {Number} queryParams.start - The first element in order to be returned.
    * @return {Promise} - Resolves when the search finished.
    */
   doQuery(queryParams) {

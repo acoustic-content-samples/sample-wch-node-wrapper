@@ -32,7 +32,7 @@ const authSDK = require('../index')({
 
 describe('WchConnector', function() {
 
-  describe.only('#init(config)', function() {
+  describe('#init(config)', function() {
     
     it('should initalize against publishing if configuration.endpoint is set to authoring', function() {
       (authSDK.isPublishContext()).should.be.false();
@@ -66,7 +66,12 @@ describe('WchConnector', function() {
         amount : 30,
         sort : 'creator asc, lastModified desc',
         start : 5
-      }).then(console.log);
+      });
+    });
+
+    it('should perform a contenttype query.' , function() {
+      this.timeout(20000);
+      return authSDK.getContentTypeDefinitions().then(console.log);
     });
 
   });
@@ -107,16 +112,17 @@ describe('WchConnector', function() {
 
   });
 
-  describe('#uploadAsset', function() {
+  describe.only('#uploadAsset', function() {
     this.timeout(20000);
 
     it('should be able to upload a new asset based on an new resource', function() {
       let asset = {
-        filePath : path.resolve('test', 'lab_services_15.jpg'),
-        fileName : 'lab_services_15.jpg',
-        randomId : true,
+        resourceDef: {
+          filePath : path.resolve('test', 'lab_services_15.jpg'),
+          fileName : 'lab_services_15.jpg',
+          randomId : true
+        },
         assetDef : {
-          id: 'ContentTypeTestTest',
           tags: {"values":['test', 'upload'],"declined":[], "analysis":"none"},
           description: 'This is kind of a test upload my dear',
           name: 'ContentTypeTestTest',

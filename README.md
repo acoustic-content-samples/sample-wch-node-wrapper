@@ -114,13 +114,130 @@ WCHConnector.createResource({
 
 ### Assets
 
-TODO
+Through the command line tool you also have the option to upload 'Web Assets'.  
+
+> `deleteAsset(assetId)`
+
+Deletes a single asset from WCH. Note: The linked resource will only be deleted when there are no other assets linked to the resource. 
+
+- `resourceDef.randomId` - [Required] The ID of the asset to be deleted
+
+> `deleteAssets(query, amount)`
+
+Deletes the specified amount of assets matching the query.
+
+```javascript
+  let deleteQry = 'name:*Calendar* AND document:*Test*';
+  WCHConnector.deleteAssets(deleteQry, 100);
+```
+
+- `query` - [Required] The fassetquery used to select the assets to get deleted. Can also be an array of multiple facetqueries.
+- `amount` - [Optional] Amount of assets to get deleted. Defaults to 100.
+
+> `createAsset(assetDef)`
+
+Creates a new asset definition. If you set the path attribute the asset will be creates as an webasset. In this case it is not visible in the authoring UI.
+
+```javascript
+  let assetDef = {
+    id: 'IdOfTheAsset', // If empty you get a random ID
+    tags: {"values":['demo', 'upload'],"declined":[],"analysis":"none"},
+    description: 'Your description of the asset to upliad',
+    name: 'NameOfTheAsset',
+    resource: 'ID to an existing resource'
+  };
+  WCHConnector.createAsset(assetDef);
+```
+
+- `assetDef` - [Required] Valid WCH definition of an asset.
+- `assetDef.id` - [Optional] The id of the new assset
+- `assetDef.tags` - [Required] Tag structure of assets. Consists of active, declined and watson tags.
+- `assetDef.tags.values` - [Required] String array with active tags for this asset. 
+- `assetDef.tags.declined` - [Required] String array with declined tags for this asset.
+- `assetDef.tags.analysis` - [Required] String indicating the status of watson auto tagging. Should be set to "none".
+- `assetDef.description` - [Optional] Description of the asset to be uploaded.
+- `assetDef.name` - [Required] The visible name of this asset for authoring UI.
+- `assetDef.resource` - [Required] The resource ID to the binary file this asset references.
+- `assetDef.path` - [Optional] When this attribute is set the asset is handled as a web asset and not visible in the authoring UI.
+
+> `updateAsset(assetDef)`
+
+Updates an existing asset definition.
+
+```javascript
+  let assetDef = {
+    id: 'IdOfTheAsset', // If empty you get a random ID
+    tags: {"values":['demo', 'upload'],"declined":[],"analysis":"none"},
+    description: 'Your description of the asset to upliad',
+    name: 'NameOfTheAsset',
+    resource: 'ID to an existing resource'
+  };
+  WCHConnector.updateAsset(assetDef);
+```
+
+- `assetDef` - [Required] Valid WCH definition of an asset.
+- `assetDef.id` - [Optional] The id of the new assset
+- `assetDef.tags` - [Required] Tag structure of assets. Consists of active, declined and watson tags.
+- `assetDef.tags.values` - [Required] String array with active tags for this asset. 
+- `assetDef.tags.declined` - [Required] String array with declined tags for this asset.
+- `assetDef.tags.analysis` - [Required] String indicating the status of watson auto tagging. Should be set to "none".
+- `assetDef.description` - [Optional] Description of the asset to be uploaded.
+- `assetDef.name` - [Required] The visible name of this asset for authoring UI.
+- `assetDef.path` - [Optional] When this attribute is set the asset is handled as a web asset and not visible in the authoring UI.
+
+> `uploadAsset(options)`
+
+Convinience method which uploads and creates a resource and afterwards an asset definition.
+
+```javascript
+  let asset = {
+        resourceDef :  {
+          filePath : 'Absoulte/Path/To/YourResourceToUpload.whatever',
+          fileName : 'thisname.jpg',
+          randomId : false
+        },
+        assetDef: {
+          id: 'IdOfTheAsset', // If empty you get a random ID
+          tags: {"values":['demo', 'upload'],"declined":[],"analysis":"none"},
+          description: 'Your description of the asset to upload',
+          name: 'NameOfTheAsset',
+          categoryIds:["IDOFACATEGORY"]
+        } 
+  }
+  WCHConnector.uploadAsset(asset);
+```
+
+- `options` - [Required] Valid WCH definition of an asset.
+- `options.filePath` - [Required] An absolute path to a file that should be uploaded to WCH as a resource. 
+- `options.fileName` - [Optional] Set a WCH specific name for this resource. This name will be shown in the authoring UI for this resource. Default is the filename.
+- `options.randomId` - [Optional] If random ID is true a generic UUID is given as an ID to the resource, otherwise the filename will be uses as the unique ID. (Hence be careful with naming colissions) Default is true.
+- `options.assetDef.id` - [Optional] The id of the new assset. If omitted you get a random ID for your asset.
+- `options.assetDef.tags` - [Required] Tag structure of assets. Consists of active, declined and watson tags.
+- `options.assetDef.tags.values` - [Required] String array with active tags for this asset. 
+- `options.assetDef.tags.declined` - [Required] String array with declined tags for this asset.
+- `options.assetDef.tags.analysis` - [Required] String indicating the status of watson auto tagging. Should be set to "none".
+- `options.assetDef.description` - [Optional] Description of the asset to be uploaded.
+- `options.assetDef.name` - [Required] The visible name of this asset for authoring UI.
+- `options.assetDef.resource` - [Required] The resource ID to the binary file this asset references.
+- `options.assetDef.path` - [Optional] When this attribute is set the asset is handled as a web asset and not visible in the authoring UI.
 
 ---
 
 ### Content Types
 
-TODO
+Creating content types through the API is rather complex. So at the moment the connector samples about this area are very simple. All samples require a valid type definition which where created through the authoring UI and altered afterwards manually.
+
+> `getContentTypeDefinitions(options)`
+
+Simple wrapper around search API reducing the search set to only content types. Hence usage is the same as `doQuery`. The only difference is that the query param is preset and fixed.
+
+> `createContentType(typeDefinition)`
+
+Creates a new content type based on a valid type definition. Type definitions get complex pretty fast. Therefore the recommendation at the moment is to use the authoring UI for such use cases.
+
+> `updateContentType(typeDefinition)`
+
+Updates an existing content type. You only are able to update from the most current version. So if somebody changes the content type before you - you have to make your changes based on the new current version.
 
 ---
 
@@ -151,6 +268,7 @@ WCHConnector.createCategory({
 
 Creating a complete taxonomy is based on a simple json definition file. The definition consists of an array of taxonomy level definitions.
 
+Taxonomy Definition:
 ```json
 [ 
   {
@@ -171,6 +289,13 @@ Creating a complete taxonomy is based on a simple json definition file. The defi
   }
 ]
 ```
+
+Connector Call:
+```javascript
+let taxonomyDef = ... // Load the taxonomy definition
+WCHConnector.createTaxonomies(taxonomyDef);
+```
+
 - `name` - [Required] If you want to create the first level of a taxonomy including it's name.
 - `parent` - [Required] For all taxonomy levels below the root. Specifies the name of the parent category. 
 - `childs` - [Required] All categories that should be defined on this level.
@@ -187,9 +312,9 @@ Convienience method which can be used to delete one or multiple taxonomies based
 ---
 
 ## Delivery
-TODO. Idea is to have two options. 
+Currently the delivery APIs are not part of this demo. (But this will change over time :) ) But the Idea is to have two options: 
 1) Directly retrieve published assets for consumtion in node e.g. JS, JSON or other files.
-2) Get a list of delivery URLs targeting the items of a delivery search. Those then can be used in your HTML, JS templates for further actions.
+2) Get a list of delivery URLs targeting the items of a delivery search. These then can be used in your HTML, JS templates.
 
 ## Next steps
 This is a living sample. The goal is to slowly increase the api coverage to 100%. Also the strucuture of this sample will change when the delivery apis are fully available for better separation of concern.
