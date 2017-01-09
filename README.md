@@ -1,4 +1,4 @@
-# wch-node-connector-sample
+# sample-wch-node-wrapper
 Node js wrapper around the Watson Content Hub apis. Coverage will slowly increase. The main focus is currently on authoring APIs. The code is well documented and a good starting point on how to use the connector in your node project. Besides it's always a good idea to have a look at it.
 
 ## How to get started
