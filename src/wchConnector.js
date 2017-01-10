@@ -76,7 +76,7 @@ class WchSDK {
   constructor (configuration) {
     // Init config with default
     this.configuration = Object.assign({
-      endpoint: 'publishing',
+      endpoint: 'delivery',
       rejectUnauthorized: true,
       maxSockets: 50
     }, configuration);
@@ -112,10 +112,10 @@ class WchSDK {
   }
 
   /**
-   * @return {Boolean} - True if the connector targets publish system, otherwise false.
+   * @return {Boolean} - True if the connector targets delivery system, otherwise false.
    */
   isPublishContext() {
-    return this.configuration.endpoint === 'publishing';
+    return this.configuration.endpoint === 'delivery';
   }
 
   /**

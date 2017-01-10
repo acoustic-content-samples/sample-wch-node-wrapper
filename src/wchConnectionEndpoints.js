@@ -17,7 +17,7 @@ module.exports = {
           uri_types: '/authoring/v1/types',
           uri_categories: '/authoring/v1/categories'
         },
-        publishing:  {
+        delivery:  {
           baseUrl: 'https://my.digitalexperience.ibm.com/api',
           uri_resource: '/delivery/v1/resources',
           // At the moment there is no delivery system for search and auth 

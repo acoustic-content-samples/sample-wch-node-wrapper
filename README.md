@@ -12,7 +12,7 @@ In order to use the connector in your node application you have to initalize the
 ```node
 const wchConnector = require('wchnode')({
         tenantid: 'YOUR TENANT ID',
-        endpoint: 'publishing',
+        endpoint: 'delivery',
         credentials: {
           usrname: 'YOUR BLUEID USER',
           pwd: 'YOUR BLUEID PASSWORD'
@@ -21,7 +21,7 @@ const wchConnector = require('wchnode')({
       });
 ```
 - `tenantid` - [Required] The Tenantid of your WCH Account you want to connect to. You can find the tenant id when you logged in into the WCH Authoring UI when clicking on the Info Button top left.
-- `endpoint` - [Optional] Choose the targeted endpoint. Either calls the authoring endpoint ('authoring') or the delivery endpoint ('publishing'). Default is 'publishing'.
+- `endpoint` - [Optional] Choose the targeted endpoint. Either interacts with content in the authoring environment ('authoring') or with delivered content ready for productional use cases ('delivery'). Default is 'delivery'.
 - `credentials` - [Optional] Used to authenticate towards content hub. Is always required when targeting the authoring endpoint. Default is anonymous.
 - `maxSockets` - [Optional] Amount of max open connections. Default is 50.
 
