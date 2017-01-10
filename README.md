@@ -27,6 +27,11 @@ const wchConnector = require('wchnode')({
 
 > **NOTE:** You can instantiate the connector multiple times e.g. to access different tenants at the same time.
 
+For more details have a look at the samples folder where you find a [complete sample][getstartedsample] on how to initalize and call this sample in your node application. The output of this sample should look [like this][getstartedsampleoutput].
+
+[getstartedsample]: https://github.ibm.com/sterbling/sample-wch-node-wrapper/blob/master/samples/starterSample.js
+[getstartedsampleoutput]: https://github.ibm.com/sterbling/sample-wch-node-wrapper/blob/master/samples/startSampleOutput.PNG
+
 ## Authoring
 Current support of authoring APIs is focused on resources, assets, authoring types and search. Future updates should allow to create content items, taxonomies and rendition profiles. Please note that you should only use the authoring APIs for authoring and never for content retrieval in production use cases with high amounts of traffic.
 
