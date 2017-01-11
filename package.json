@@ -1,6 +1,6 @@
 {
   "name": "wchnode",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "main": "index.js",
   "license": "Apache-2.0",
@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.ibm.com:sterbling/wch-node-sdk.git"
+    "url": "git@github.ibm.com:sterbling/sample-wch-node-wrapper.git"
   },
   "engines": {
     "node": "4.x"
