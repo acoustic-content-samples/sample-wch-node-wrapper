@@ -21,7 +21,7 @@ const wchConnector = require('wchnode')({
       });
 ```
 - `tenantid` - [Required] The Tenantid of your WCH Account you want to connect to. You can find the tenant id when you logged in into the WCH Authoring UI when clicking on the Info Button top left.
-- `endpoint` - [Optional] Choose the targeted endpoint. Either interacts with content in the authoring environment ('authoring') or with delivered content ready for productional use cases ('delivery'). Default is 'delivery'.
+- `endpoint` - [Optional] Choose the targeted endpoint. Either interacts with content in the authoring environment ('authoring') or with delivered content ready for production use cases ('delivery'). Default is 'delivery'.
 - `credentials` - [Optional] Used to authenticate towards content hub. Is always required when targeting the authoring endpoint. Default is anonymous.
 - `maxSockets` - [Optional] Amount of max open connections. Default is 50.
 
@@ -91,7 +91,7 @@ WCHConnector.doSearch({
 
 ### Resource
 
-Resources are not directly visible in the authoring UI since resources are mainly a technical concept. Every asset references a resource by it's unique id. Hence you can think of a resource as the actual binary that is stored in WCH and an asset are specific metadata describing and referencing a resource. **NOTE:** If you study the public APIs closely you will see that there is no DELETE endpoint for resources. This is because resources will get autocleaned periodically by WCH if there are no more assets which are referencing the resource.
+Resources are not directly visible in the authoring UI since resources are mainly a technical concept. Every asset references a resource by its unique id. Hence you can think of a resource as the actual binary that is stored in WCH and an asset as specific metadata describing and referencing a resource. **NOTE:** If you study the public APIs closely you will see that there is no DELETE endpoint for resources. This is because resources will get autocleaned periodically by WCH if there are no more assets which are referencing the resource.
 
 > `createResource(resourceDef)`
 
@@ -131,7 +131,7 @@ Deletes the specified amount of assets matching the query.
   WCHConnector.deleteAssets(deleteQry, 100);
 ```
 
-- `query` - [Required] The fassetquery used to select the assets to get deleted. Can also be an array of multiple facetqueries.
+- `query` - [Required] The assetquery used to select the assets to get deleted. Can also be an array of multiple facetqueries.
 - `amount` - [Optional] Amount of assets to get deleted. Defaults to 100.
 
 > `createAsset(assetDef)`
@@ -187,7 +187,7 @@ Updates an existing asset definition.
 
 > `uploadAsset(options)`
 
-Convinience method which uploads and creates a resource and afterwards an asset definition.
+Convenience method which uploads and creates a resource and afterwards an asset definition.
 
 ```javascript
   let asset = {
@@ -225,7 +225,7 @@ Convinience method which uploads and creates a resource and afterwards an asset 
 
 ### Content Types
 
-Creating content types through the API is rather complex. So at the moment the connector samples about this area are very simple. All samples require a valid type definition which where created through the authoring UI and altered afterwards manually.
+Creating content types through the API is rather complex. So at the moment the connector samples about this area are very simple. All samples require a valid type definition which was created through the authoring UI and altered afterwards manually.
 
 > `getContentTypeDefinitions(options)`
 
@@ -296,14 +296,14 @@ let taxonomyDef = ... // Load the taxonomy definition
 WCHConnector.createTaxonomies(taxonomyDef);
 ```
 
-- `name` - [Required] If you want to create the first level of a taxonomy including it's name.
+- `name` - [Required] If you want to create the first level of a taxonomy including its name.
 - `parent` - [Required] For all taxonomy levels below the root. Specifies the name of the parent category. 
 - `childs` - [Required] All categories that should be defined on this level.
 > **NOTE:** You could create multiple taxonomies in one definition. As soon as a new taxonomy is started make sure that all following category levels are targeted at the new taxonomy.
 
 > `deleteCategory(categoryId)`
 
-Deletes a category based on it's it. Will also delete all subcategories. Hence if you want to delete a taxonomy delete the root category.
+Deletes a category based on its it. Will also delete all subcategories. Hence if you want to delete a taxonomy delete the root category.
 
 > `deleteTaxonomies(query, amount)`
 
