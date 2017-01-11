@@ -62,14 +62,14 @@ Body:
 
 ### Search
 
-> `doQuery(queryParams)`
+> `doSearch(queryParams)`
 
 Performs a search against all content on the authoring environment. The query is based [on Solr][SolrQry]. Hence you can have a look at their documentation for further information on how to create a valid query. Make sure to escape your query properly. Have a look at the simple helper method `escapeSolrChars` on how to do so.
 
 [SolrQry]: https://cwiki.apache.org/confluence/display/solr/Query+Syntax+and+Parsing
 
 ```javascript
-WCHConnector.doQuery({
+WCHConnector.doSearch({
         query : '*:*',
         fields: 'creator, lastModified, classification',
         facetquery : ['classification:asset', 'lastModified:[2016-12-20T09:15:25.882Z TO NOW]'],
@@ -229,7 +229,7 @@ Creating content types through the API is rather complex. So at the moment the c
 
 > `getContentTypeDefinitions(options)`
 
-Simple wrapper around search API reducing the search set to only content types. Hence usage is the same as `doQuery`. The only difference is that the query param is preset and fixed.
+Simple wrapper around search API reducing the search set to only content types. Hence usage is the same as `doSearch`. The only difference is that the query param is preset and fixed.
 
 > `createContentType(typeDefinition)`
 

@@ -23,6 +23,6 @@ module.exports = {
           // At the moment there is no delivery system for search and auth 
           // hence the endpoints are the same as in authoring... TODO
           uri_search: '/authoring/v1/search',
-          uri_auth:   '/authoring/v1/basicauth'
+          uri_auth:   '/login/v1/basicauth'
         }
       };

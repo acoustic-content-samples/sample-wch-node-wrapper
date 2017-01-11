@@ -18,6 +18,7 @@
 
 const rp = require('request-promise'),
       Promise = require('bluebird'),
+      Queue = require('promise-queue'),
       fs = Promise.promisifyAll(require('fs')),
       path = require('path'),
       crypto = require('crypto'),
@@ -36,9 +37,9 @@ const wchEndpoints = require('./wchConnectionEndpoints');
  * @return {Promise} - Waiting for the response
  */
 function send(options, retryHandling) {
-  return rp(options)
-        .catch(errLogger)
-        .catch(err => retryHandling(err).then(() => rp(options)));
+  return rp(options).
+         catch(errLogger).
+         catch(err => retryHandling(err).then(() => rp(options)));
 }
 
 /**
@@ -199,7 +200,9 @@ class WchSDK {
         })
       ).
       then(options => send(options, this.retryHandler)).
-      catch((err) => console.log(err.message));
+      then(() => `Deleted ${assetId} succesfully.`).
+      catch(errLogger).
+      catch(err => `An error occured deleting ${assetId}: Status ${err.statusCode}. Enable debugging for details.`);
   }
 
   /**
@@ -212,12 +215,13 @@ class WchSDK {
     if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
     let parallelDeletes = Math.ceil(this.configuration.maxSockets / 5); // Use 1/5th of the connections in parallel
     let amtEle = amount || 100;
+    let queue = new Queue(parallelDeletes, amtEle);
     let qryParams = {query: `classification:asset`, facetquery: query, fields:'id', amount: amtEle};
-    return this.doQuery(qryParams).
+    return this.doSearch(qryParams).
             then(data => (data.documents) ? data.documents : []).
             map(document => (document.id.startsWith('asset:')) ? document.id.substring('asset:'.length) : document.id).
-            then(docIds => Array(Math.ceil(docIds.length/parallelDeletes)).fill().map((_,i) => docIds.slice(i*parallelDeletes, i*parallelDeletes+parallelDeletes))).
-            each(docIdChunk => Promise.all(docIdChunk.map(doc => this.deleteAsset(doc))));
+            map(docId => queue.add(() => this.deleteAsset(docId)))
+            .all();
   }
 
   /**
@@ -322,7 +326,7 @@ class WchSDK {
 
   /**
    * Getter for content type definitions. Simple wrapper around search API. 
-   * All params allowed as in doQuery except for query which is predefined.
+   * All params allowed as in doSearch except for query which is predefined.
    * @param  {Object} queryParams - The params object to build a query. Not all params are supported yet!
    * @param  {String} queryParams.fields - The fields returned from the search. Default are all fields.
    * @param  {String} queryParams.facetquery - Query to filter the main result. Cachable. Default is none.
@@ -338,7 +342,7 @@ class WchSDK {
         options, 
         {query: 'classification:content-type'}
       );
-    return this.doQuery(searchQry);
+    return this.doSearch(searchQry);
   }
 
   /**
@@ -450,7 +454,7 @@ class WchSDK {
         })
       ).
       then(options => send(options, this.retryHandler)).
-      catch((err) => console.log(err.message));
+      catch(errLogger);
   }
 
   /* Convinience method to create taxonomies. */
@@ -502,7 +506,7 @@ class WchSDK {
     if(!isAuthoring(this.configuration)) new Error('Not supported on delivery!');
     let amtEle = amount || 100;
     let qryParams = {query: 'classification:taxonomy', facetquery: query, fields:'id', amount: amtEle};
-    return this.doQuery(qryParams).
+    return this.doSearch(qryParams).
       then(data => (data.documents) ? data.documents : []).
       map(document => (document.id.startsWith('taxonomy:')) ? document.id.substring('taxonomy:'.length) : document.id).
       map(id => this.deleteCategory(id)).
@@ -522,7 +526,7 @@ class WchSDK {
    * @param  {Number} queryParams.start - The first element in order to be returned.
    * @return {Promise} - Resolves when the search finished.
    */
-  doQuery(queryParams) {
+  doSearch(queryParams) {
     let _query = queryParams.query || '*:*';
     let _fields = queryParams.fields || '*';
     let _fq = queryParams.facetquery || '';
@@ -553,7 +557,7 @@ class WchSDK {
     var _type = escapeSolrChars(type) || '',
         _id = escapeSolrChars(id) || '',
         _filter = filter || '';
-    return this.doQuery({
+    return this.doSearch({
             query: `id:${_filter}${_type}\\:${_id}`,
             amount: 1
         });
@@ -562,7 +566,7 @@ class WchSDK {
   getAllAssetsAndContent(filter, amount, sortAsc) {
     var _filter = (filter) ? ' '+filter : '',
         _sort = `lastModified ${(sortAsc) ? 'asc' : 'desc'}`;
-    return this.doQuery({
+    return this.doSearch({
       query: '*:*',
       facetquery: _filter, 
       amount: amount,
@@ -574,7 +578,7 @@ class WchSDK {
     var _filter = (type) ? ' AND type:'+type : '',
         _sort = `lastModified ${(sortAsc) ? 'asc' : 'desc'}`;
 
-    return this.doQuery({
+    return this.doSearch({
       query: `classification:content${_filter}`, 
       amount: amount,
       sort: _sort,
@@ -584,7 +588,7 @@ class WchSDK {
 
   getImageProfileWithName(name) {
     var _filter = (name) ? ' AND name:'+name : '';
-    return this.doQuery({
+    return this.doSearch({
       query: `classification:image-profile${_filter}`, 
       amount: 1
     });

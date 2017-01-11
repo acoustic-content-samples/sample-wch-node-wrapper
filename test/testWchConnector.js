@@ -59,7 +59,7 @@ describe('WchConnector', function() {
 
     it('should perform a complex query.' , function() {
       this.timeout(20000);
-      return authSDK.doQuery({
+      return authSDK.doSearch({
         query : '*:*',
         fields: 'creator, lastModified, classification',
         facetquery : ['classification:asset', 'lastModified:[2016-12-20T09:15:25.882Z TO NOW]'],
@@ -112,14 +112,14 @@ describe('WchConnector', function() {
 
   });
 
-  describe.only('#uploadAsset', function() {
+  describe('#uploadAsset', function() {
     this.timeout(20000);
 
     it('should be able to upload a new asset based on an new resource', function() {
       let asset = {
         resourceDef: {
-          filePath : path.resolve('test', 'lab_services_15.jpg'),
-          fileName : 'lab_services_15.jpg',
+          filePath : path.resolve('test', 'sampleresource.jpg'),
+          fileName : 'sampleresource.jpg',
           randomId : true
         },
         assetDef : {
@@ -151,8 +151,8 @@ describe('WchConnector', function() {
 
   });
 
-  describe('#deleteAssets', function() {
-    this.timeout(20000);
+  describe.only('#deleteAssets', function() {
+    this.timeout(200000);
 
     it('should be able to delete multiple existing assets', function() {
       return authSDK.deleteAssets('name:*Calendar*').then(console.log, console.err);

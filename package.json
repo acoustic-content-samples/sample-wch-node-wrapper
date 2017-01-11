@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": false,
   "main": "index.js",
-  "license":  "Apache-2.0",
+  "license": "Apache-2.0",
   "author": "Sven Sterbling <sterbling@de.ibm.com>",
   "scripts": {
     "start": "echo 'npm package'",
@@ -13,6 +13,7 @@
     "async": "^2.1.2",
     "bluebird": "^3.4.6",
     "mime-types": "^2.1.12",
+    "promise-queue": "^2.2.3",
     "request": "^2.75.0",
     "request-promise": "^4.1.1"
   },
