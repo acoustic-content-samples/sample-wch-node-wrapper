@@ -322,18 +322,17 @@ Currently only assets can be delivered.
 
 > `getResourceDeliveryUrls(options)`
 
-Convenience method to create valid delivery urls to asset resources. Per default no distinction is made between assets and web-assets. If you want to restrict the search to only one of those use the isManaged search parameter. Have a look at [this sample][resourcedeliverysample] on how the different urltypes look like.
+Convenience method which creates valid delivery urls to resources based on a search query. Per default no distinction is made between assets and web-assets. If you want to restrict the search to only one of those use the `isManaged` search parameter. Have a look at [this sample][resourcedeliverysample] on how the different urltypes look like.
 
 [resourcedeliverysample]: https://github.ibm.com/sterbling/sample-wch-node-wrapper/blob/master/samples/resourceDeliveryUrlSample.js
 
 ```javascript
 WCHConnector.getResourceDeliveryUrls({
-  urlType:'akami',
+  urlType: 'akami',
   queryParams: {
     facetquery: 'name:*TypeTest*',
     amount: 1,
-    isManaged: false,
-    start: 0
+    isManaged: false
   }
 });
 ```
@@ -341,6 +340,7 @@ WCHConnector.getResourceDeliveryUrls({
 - `options.urlType` - [Optional] Defines the URL type. Valid options are `id`, `path` and `akami`. Default type is id.
 - `options.queryParams` - [Optional] Refines the query to match for a specific set of assets. All params as in `doSearch` are allowed expect for query and fields. 
 
+---
 
 ## Next steps
 This is a living sample. The goal is to slowly increase the api coverage to 100%. Also the strucuture of this sample will change when the delivery apis are fully available for better separation of concern.
