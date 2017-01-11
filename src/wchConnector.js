@@ -168,7 +168,7 @@ class WchSDK {
       akami: {
         field:'path',
         transform: (baseUrl, tenantid, element, path) => {
-          return `https://my.digitalexperience.ibm.com/${tenantid}${element.path}`;
+          return `${baseUrl}/${tenantid}${element.path}`;
         }
       }
     }
