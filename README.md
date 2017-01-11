@@ -60,7 +60,7 @@ POST https://my.digitalexperience.ibm.com/api/login/v1/basicauth
 Headers:
   Content-Type: application/x-www-form-urlencoded
 Body:
-   j_username=<USERNAME>&j_password=<PASSWORD>
+   j_username=USERNAME&j_password=PASSWORD
 ```
 
 ---
@@ -87,10 +87,11 @@ WCHConnector.doSearch({
 - `queryParams` - [Required] The search query object passed into the method.
 - `queryParams.query` - [Optional] The main query. Must be a valid Solr query. Defaults to query for all content.  
 - `queryParams.fields` - [Optional] Comma separated list of fiels to get returned in the search result. Default are all fields.
-- `queryParams.facetquery` - [Optional] Subquery performed on the results of the main query. The input can also be an array containing multiple facet queries.
 - `queryParams.amount` - [Optional] The amount of documents that will be returned in the search result. Defaults to 10 documents matching the query.
 - `queryParams.sort` - [Optional] Define a valid Solr sort criteria based on a valid index. Can also contain multiple indexes. Sortable either asc (ascending) or desc (descending)
 - `queryParams.start` - [Optional] The starting point after sorting from where to return the number of elements defined in `amount`. Default starting point is index 0. 
+- `queryParams.facetquery` - [Optional] Subquery performed on the results of the main query. The input can also be an array containing multiple facet queries.
+- `queryParams.isManaged` - [Optional] If true the result set only contains on managed elements. If set to false on unmanaged elements are returned. (Only Managed elements are visible in the authoring UI) Default are all elements. No difference between managed an unmanaged.
 
 ---
 
@@ -317,9 +318,29 @@ Convienience method which can be used to delete one or multiple taxonomies based
 ---
 
 ## Delivery
-Currently the delivery APIs are not part of this demo. (But this will change over time :) ) But the Idea is to have two options: 
-1) Directly retrieve published assets for consumtion in node e.g. JS, JSON or other files.
-2) Get a list of delivery URLs targeting the items of a delivery search. These then can be used in your HTML, JS templates.
+Currently only assets can be delivered. 
+
+> `getResourceDeliveryUrls(options)`
+
+Convenience method to create valid delivery urls to asset resources. Per default no distinction is made between assets and web-assets. If you want to restrict the search to only one of those use the isManaged search parameter. Have a look at [this sample][resourcedeliverysample] on how the different urltypes look like.
+
+[resourcedeliverysample]: https://github.ibm.com/sterbling/sample-wch-node-wrapper/blob/master/samples/resourceDeliveryUrlSample.js
+
+```javascript
+WCHConnector.getResourceDeliveryUrls({
+  urlType:'akami',
+  queryParams: {
+    facetquery: 'name:*TypeTest*',
+    amount: 1,
+    isManaged: false,
+    start: 0
+  }
+});
+```
+- `options` - [Optional] Options on how to generate the delivery Urls.
+- `options.urlType` - [Optional] Defines the URL type. Valid options are `id`, `path` and `akami`. Default type is id.
+- `options.queryParams` - [Optional] Refines the query to match for a specific set of assets. All params as in `doSearch` are allowed expect for query and fields. 
+
 
 ## Next steps
 This is a living sample. The goal is to slowly increase the api coverage to 100%. Also the strucuture of this sample will change when the delivery apis are fully available for better separation of concern.

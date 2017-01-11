@@ -74,11 +74,21 @@ describe('WchConnector', function() {
       return authSDK.getContentTypeDefinitions().then(console.log);
     });
 
+    it('should return deliver URLs', function() {
+      this.timeout(30000);
+      return authSDK.getResourceDeliveryUrls().then(console.log);
+    });
+
   });
 
-  describe('#dologin', function() {
+  describe.only('#dologin', function() {
 
     it('should create a valid auth cookie to access private content');
+
+    it('should return deliver URLs', function() {
+      this.timeout(30000);
+      return authSDK.getResourceDeliveryUrls({queryParams:{facetquery:'name:*TypeTest*',isManaged:false},urlType:'akami'}).then(console.log);
+    });
 
   });
 
@@ -134,6 +144,26 @@ describe('WchConnector', function() {
         then(console.log, console.err);
     });
 
+    it('should be able to upload a new web asset based on an new resource', function() {
+      let asset = {
+        resourceDef: {
+          filePath : path.resolve('test', 'sampleresource.jpg'),
+          fileName : 'sampleresource.jpg',
+          randomId : false
+        },
+        assetDef : {
+          tags: {"values":['test', 'upload'],"declined":[], "analysis":"none"},
+          description: 'This is kind of a test upload my dear',
+          name: 'ContentTypeTestTest',
+          categoryIds:["12fbc71263acc432dbeb5a31b5ce70af"],
+          path: '/sample/sampleresource.jpg'
+        }
+      }
+      return authSDK.
+        uploadAsset(asset).
+        then(console.log, console.err);
+    });
+
   });
 
   describe('#deleteAsset', function() {
@@ -151,7 +181,7 @@ describe('WchConnector', function() {
 
   });
 
-  describe.only('#deleteAssets', function() {
+  describe('#deleteAssets', function() {
     this.timeout(200000);
 
     it('should be able to delete multiple existing assets', function() {

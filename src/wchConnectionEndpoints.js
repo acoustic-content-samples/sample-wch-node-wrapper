@@ -9,7 +9,8 @@
  */
 module.exports = {
         authoring : {
-          baseUrl: 'https://my.digitalexperience.ibm.com/api', 
+          akamiUrl: 'https://my.digitalexperience.ibm.com',
+          baseUrl: 'https://my.digitalexperience.ibm.com/api',
           uri_search: '/authoring/v1/search',
           uri_auth: '/login/v1/basicauth',
           uri_resource: '/authoring/v1/resources',
@@ -17,7 +18,8 @@ module.exports = {
           uri_types: '/authoring/v1/types',
           uri_categories: '/authoring/v1/categories'
         },
-        delivery:  {
+        delivery :  {
+          akamiUrl: 'https://my.digitalexperience.ibm.com',
           baseUrl: 'https://my.digitalexperience.ibm.com/api',
           uri_resource: '/delivery/v1/resources',
           // At the moment there is no delivery system for search and auth 
