@@ -322,7 +322,7 @@ Currently only assets can be delivered.
 
 > `getResourceDeliveryUrls(options)`
 
-Convenience method which creates valid delivery urls to resources based on a search query. Per default no distinction is made between assets and web-assets. If you want to restrict the search to only one of those use the `isManaged` search parameter. Have a look at [this sample][resourcedeliverysample] on how the different urltypes look like.
+Convienience method which creates valid delivery urls to resources based on a search query. Per default no distinction is made between assets and web-assets. If you want to restrict the search to only one of those use the `isManaged` search parameter. Have a look at [this sample][resourcedeliverysample] on how the different urltypes look like.
 
 [resourcedeliverysample]: https://github.ibm.com/sterbling/sample-wch-node-wrapper/blob/master/samples/resourceDeliveryUrlSample.js
 
@@ -343,4 +343,14 @@ WCHConnector.getResourceDeliveryUrls({
 ---
 
 ## Next steps
-This is a living sample. The goal is to slowly increase the api coverage to 100%. Also the strucuture of this sample will change when the delivery apis are fully available for better separation of concern.
+This is a living sample. The goal is to slowly increase the api coverage to 100%. Also the strucuture of this sample will change when the delivery apis are fully available for better separation of concern. Furthermore creating good test cases is another todo.
+
+---
+
+### Resources
+
+API Explorer reference documentation: https://developer.ibm.com/api/view/id-618
+
+Watson Content Hub developer center: https://developer.ibm.com/wch/
+
+Watson Content Hub forum: https://developer.ibm.com/answers/smart-spaces/watson-content-hub.html

@@ -74,9 +74,9 @@ describe('WchConnector', function() {
       return authSDK.getContentTypeDefinitions().then(console.log);
     });
 
-    it('should return deliver URLs', function() {
+    it('should return delivery URLs', function() {
       this.timeout(30000);
-      return authSDK.getResourceDeliveryUrls().then(console.log);
+      return authSDK.getResourceDeliveryUrls({queryParams:{facetquery:'name:*TypeTest*',isManaged:false},urlType:'akami'}).then(console.log);
     });
 
   });
@@ -84,11 +84,6 @@ describe('WchConnector', function() {
   describe.only('#dologin', function() {
 
     it('should create a valid auth cookie to access private content');
-
-    it('should return deliver URLs', function() {
-      this.timeout(30000);
-      return authSDK.getResourceDeliveryUrls({queryParams:{facetquery:'name:*TypeTest*',isManaged:false},urlType:'akami'}).then(console.log);
-    });
 
   });
 
