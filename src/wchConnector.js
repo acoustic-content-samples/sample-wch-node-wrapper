@@ -223,14 +223,29 @@ class WchSDK {
    * @return {Promise} - Resolves when the search finished.
    */
   doSearch(queryParams) {
+    // General standard query variables
     let _query = queryParams.query || '*:*';
     let _fields = queryParams.fields || '*';
-    let _amount = queryParams.amount || 10;
+    let _amount = ('amount' in queryParams) ? queryParams.amount : 10;
     let _sort = queryParams.sort || '';
     let _start = queryParams.start || 0;
     let _fq = queryParams.facetquery || '';
-    let _isManaged = (queryParams.isManaged !== undefined) ? `isManaged:("${queryParams.isManaged}")` : '';
-
+    // Edismax main parser variables
+    let _useEdismax = 'edismax' in queryParams;
+    let _defType = (_useEdismax) ? 'edismax' : 'lucene';
+    let _qf = (_useEdismax) ? queryParams.edismax.queryFields : undefined;
+    // Facet specific variables
+    let _useFacets = queryParams.facet !== undefined;
+    let _facet = queryParams.facet || {};
+    let _facetFields = _facet.fields || [];
+    let _facetMincount = _facet.mincount || 0;
+    let _facetLimit = _facet.limit || 10;
+    let _facetContains = _facet.contains || {};
+    let _facetContainsText = _facetContains.text || undefined; 
+    let _facetContainsIgnoreCase = _facetContains.ignoreCase || undefined;
+    // WCH specific variables
+    let _isManaged = ('isManaged' in queryParams) ? `isManaged:("${queryParams.isManaged}")` : '';
+    
     return this.loginstatus.
       then(() => Object.assign({},
         this.options,
@@ -241,7 +256,15 @@ class WchSDK {
             fq: new Array().concat(_fq, _isManaged),
             rows: _amount,
             sort: _sort,
-            start: _start
+            start: _start,
+            defType: _defType,
+            qf: _qf,
+            facet: _useFacets,
+            'facet.contains': _facetContainsText,
+            'facet.contains.ignoreCase': _facetContainsIgnoreCase, 
+            'facet.mincount': _facetMincount,
+            'facet.limit': _facetLimit,
+            'facet.field' : _facetFields
           },
           useQuerystring: true
         })).

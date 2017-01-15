@@ -86,7 +86,7 @@ WCHConnector.doSearch({
 
 - `queryParams` - [Required] The search query object passed into the method.
 - `queryParams.query` - [Optional] The main query. Must be a valid Solr query. Defaults to query for all content.  
-- `queryParams.fields` - [Optional] Comma separated list of fiels to get returned in the search result. Default are all fields.
+- `queryParams.fields` - [Optional] Comma separated list of fiels to get returned in the search result. Default is set to all available fields.
 - `queryParams.amount` - [Optional] The amount of documents that will be returned in the search result. Defaults to 10 documents matching the query.
 - `queryParams.sort` - [Optional] Define a valid Solr sort criteria based on a valid index. Can also contain multiple indexes. Sortable either asc (ascending) or desc (descending)
 - `queryParams.start` - [Optional] The starting point after sorting from where to return the number of elements defined in `amount`. Default starting point is index 0. 

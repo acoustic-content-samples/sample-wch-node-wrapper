@@ -32,7 +32,7 @@ const authSDK = require('../index')({
 
 describe('WchConnector', function() {
 
-  describe('#init(config)', function() {
+  describe.only('#init(config)', function() {
     
     it('should initalize against publishing if configuration.endpoint is set to authoring', function() {
       (authSDK.isPublishContext()).should.be.false();
@@ -69,6 +69,26 @@ describe('WchConnector', function() {
       });
     });
 
+    it.only('should perform a facet query.' , function() {
+      this.timeout(20000);
+      return authSDK.doSearch({
+        query : '*test*',
+        amount : 0,
+        edismax: {
+          queryFields: ['name', 'assetType', 'tags', 'status', 'categoryLeaves keywords renditionCount'],
+        },
+        facet: {
+          fields: ['name', 'assetType', 'tags', 'status', 'categoryLeaves', 'keywords'],
+          mincount: 0,
+          limit: 10,
+          contains : {
+            text: 'Test',
+            ignoreCase: true
+          }
+        }
+      }).then(console.log);
+    });
+
     it('should perform a contenttype query.' , function() {
       this.timeout(20000);
       return authSDK.getContentTypeDefinitions().then(console.log);
@@ -81,7 +101,7 @@ describe('WchConnector', function() {
 
   });
 
-  describe.only('#dologin', function() {
+  describe('#dologin', function() {
 
     it('should create a valid auth cookie to access private content');
 
