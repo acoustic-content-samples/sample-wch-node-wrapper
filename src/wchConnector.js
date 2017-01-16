@@ -243,14 +243,26 @@ class WchSDK {
     let _facetContains = _facet.contains || {};
     let _facetContainsText = _facetContains.text || undefined; 
     let _facetContainsIgnoreCase = _facetContains.ignoreCase || undefined;
+    let _facetRange = _facet.range || {};
+    let _facetRangeFields = _facetRange.fields || [];
+    let _facetRangeStart = _facetRange.start || undefined;
+    let _facetRangeEnd = _facetRange.end || undefined;
+    let _facetRangeGap = _facetRange.gap || undefined;
+    // Override settings for specific fields
+    let _override = queryParams.override || {};
     // WCH specific variables
     let _isManaged = ('isManaged' in queryParams) ? `isManaged:("${queryParams.isManaged}")` : '';
-    
+
+    let f = {};
+    for(let key in _override) {
+        f['f.'+key] = _override[key];
+    }
+
     return this.loginstatus.
       then(() => Object.assign({},
         this.options,
         {
-          qs: {
+          qs: Object.assign({
             q: _query,
             fl: _fields,
             fq: new Array().concat(_fq, _isManaged),
@@ -260,12 +272,16 @@ class WchSDK {
             defType: _defType,
             qf: _qf,
             facet: _useFacets,
+            'facet.range': _facetRangeFields,
+            'facet.range.start': _facetRangeStart,
+            'facet.range.end': _facetRangeEnd,
+            'facet.range.gap': _facetRangeGap,
             'facet.contains': _facetContainsText,
             'facet.contains.ignoreCase': _facetContainsIgnoreCase, 
             'facet.mincount': _facetMincount,
             'facet.limit': _facetLimit,
             'facet.field' : _facetFields
-          },
+          }, f),
           useQuerystring: true
         })).
       then(options => send(options, this.retryHandler));

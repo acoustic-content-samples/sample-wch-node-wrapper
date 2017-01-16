@@ -78,15 +78,25 @@ describe('WchConnector', function() {
           queryFields: ['name', 'assetType', 'tags', 'status', 'categoryLeaves keywords renditionCount'],
         },
         facet: {
-          fields: ['name', 'assetType', 'tags', 'status', 'categoryLeaves', 'keywords'],
-          mincount: 0,
+          fields: ['name', 'assetType', 'tags', 'status', 'categoryLeaves', 'keywords', 'creator'],
+          range: {
+            fields: ['created', 'lastModified'],
+            start: 'NOW/DAY-30DAYS',
+            end: 'NOW',
+            gap: '+1DAY'
+          },
+          mincount: 1,
           limit: 10,
           contains : {
             text: 'Test',
             ignoreCase: true
           }
+        },
+        override: {
+          'created.facet.mincount': 0, 
+          'lastModified.facet.mincount': 0
         }
-      }).then(console.log);
+      }).then(data => console.log(data.facet_ranges));
     });
 
     it('should perform a contenttype query.' , function() {
