@@ -95,7 +95,7 @@ WCHConnector.doSearch({
 
 **Extended Search Options**
 
-For some search scenarios you might find the standard query parser quite cumbersome to use. Especially that the standard query parses enforces a more rigid syntax might be troubeling for searches performed by customers. Therefore there are two other main parsers available with Solr. Those two can also be used for building search queries against WCH. For details about all available parsers have a [look at the Solr documentation][Dismax]. The current state of the sample supports the default 'lucene' parser, the 'dismax' (maximum disjunction) parser and the 'edismax' (extended maximum disjunction) parser. A complete parameter support will come over time.
+For some search scenarios you might find the standard query parser quite cumbersome to use. Especially that the standard query parses enforces a more rigid syntax might be troubeling for searches performed by customers. Therefore there are two other main parsers available with Solr. Those two can also be used for building search queries against WCH. For details about all available parsers have a [look at the Solr documentation][Dismax]. The current state of the sample supports the default `lucene` parser, the `dismax` (maximum disjunction) parser and the `edismax` (extended maximum disjunction) parser. A complete parameter support will come over time.
 
 Another feature supported for extended use cases is faceting. You can use faceting for example if you want to implement [typeahead support][typeaheadsample] against WCH content or if you want to give the user 'drill-down' options to refine the search. You can also use faceting for range exploration as [shown in this example][youractivitysample]. For details reference [the official documentation][Faceting].
 
@@ -133,22 +133,22 @@ WCHConnector.doSearch({
         }
       });
 ```
-- `dismax` - [Optional] Object containing dismax specific settings. If this param exists dismax parser is enabled.
-- `dismax.extended` - [Optional] Boolean specifing if the extended dismax parsers should be used. Defaults to false (and hence to the dismax parser).
-- `dismax.queryFields` - [Required] The index fields against which the query is evaluated. Can either be a string with multiple fields separated by a space or an array.
-- `facet` - [Optional] Object containing facet specific settings. If this param exists faceting is enabled.
-- `facet.fields` - [Required] The fields which are used for creating the facet. Can either be a string with multiple fields separated by a space or an array.
-- `facet.range` - [Optional] Object containing range specific settings for facets.
-- `facet.range.fields` - [Required] The fields which are used for creating the range facet. Can either be a string with multiple fields separated by a space or an array.
-- `facet.range.start` - [Optional] The starting point to create the range.
-- `facet.range.end` - [Optional] The endpoint of the range.
-- `facet.range.gap` - [Optional] Identifies the steps between a point in the range.
-- `facet.mincount` - [Optional] Specifies the minimum counts required for a facet field to be included in the response.
-- `facet.limit` - [Optional] Controls how many constraints should be returned for each facet.
-- `facet.contains` - [Optional] Object containing the facet contains settings.
-- `facet.contains.text` - [Optional] Limits the terms used for faceting to those that contain the specified substring.
-- `facet.contains.ignoreCase` - [Optional] If facet.contains is used, ignore case when searching for the specified substring.
-- 'override' - [Optional] Easy way to override settings for a specific field.
+- `queryParams.dismax` - [Optional] Object containing dismax specific settings. If this param exists dismax parser is enabled.
+- `queryParams.dismax.extended` - [Optional] Boolean specifing if the extended dismax parsers should be used. Defaults to false (and hence to the dismax parser).
+- `queryParams.dismax.queryFields` - [Required] The index fields against which the query is evaluated. Can either be a string with multiple fields separated by a space or an array.
+- `queryParams.facet` - [Optional] Object containing facet specific settings. If this param exists faceting is enabled.
+- `queryParams.facet.fields` - [Required] The fields which are used for creating the facet. Can either be a string with multiple fields separated by a space or an array.
+- `queryParams.facet.range` - [Optional] Object containing range specific settings for facets.
+- `queryParams.facet.range.fields` - [Required] The fields which are used for creating the range facet. Can either be a string with multiple fields separated by a space or an array.
+- `queryParams.facet.range.start` - [Optional] The starting point to create the range.
+- `queryParams.facet.range.end` - [Optional] The endpoint of the range.
+- `queryParams.facet.range.gap` - [Optional] Identifies the steps between a point in the range.
+- `queryParams.facet.mincount` - [Optional] Specifies the minimum counts required for a facet field to be included in the response.
+- `queryParams.facet.limit` - [Optional] Controls how many constraints should be returned for each facet.
+- `queryParams.facet.contains` - [Optional] Object containing the facet contains settings.
+- `queryParams.facet.contains.text` - [Optional] Limits the terms used for faceting to those that contain the specified substring.
+- `queryParams.facet.contains.ignoreCase` - [Optional] If facet.contains is used, ignore case when searching for the specified substring.
+- `queryParams.override` - [Optional] Easy way to override settings for a specific field.
 
 ---
 

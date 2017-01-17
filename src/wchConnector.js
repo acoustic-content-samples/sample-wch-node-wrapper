@@ -220,6 +220,22 @@ class WchSDK {
    * @param  {Number} queryParams.start - The first element in order to be returned.
    * @param  {String} queryParams.facetquery - Query to filter the main result. Cachable. Default is none.
    * @param  {Bool}   queryParams.isManaged - If true the result set only contains on managed elements. If set to false on unmanaged elements are returned. (Only Managed elements are visible in the authoring UI) Default are all elements. No difference between managed an unmanaged.
+   * @param  {Object} queryParams.dismax - Object containing dismax specific settings. If this param exists dismax parser is enabled.
+   * @param  {Bool}   queryParams.dismax.extended - Boolean specifing if the extended dismax parsers should be used. Defaults to false (and hence to the dismax parser).
+   * @param  {String} queryParams.dismax.queryFields - The index fields against which the query is evaluated. Can either be a string with multiple fields separated by a space or an array.
+   * @param  {Object} queryParams.facet - Object containing facet specific settings. If this param exists faceting is enabled.
+   * @param  {String} queryParams.facet.fields - The fields which are used for creating the facet. Can either be a string with multiple fields separated by a space or an array.
+   * @param  {Object} queryParams.facet.range - Object containing range specific settings for facets.
+   * @param  {String} queryParams.facet.range.fields - The fields which are used for creating the range facet. Can either be a string with multiple fields separated by a space or an array.
+   * @param  {String} queryParams.facet.range.start - The starting point to create the range.
+   * @param  {String} queryParams.facet.range.end - The endpoint of the range.
+   * @param  {String} queryParams.facet.range.gap - Identifies the steps between a point in the range.
+   * @param  {Number} queryParams.facet.mincount - Specifies the minimum counts required for a facet field to be included in the response.
+   * @param  {Number} queryParams.facet.limit - Controls how many constraints should be returned for each facet.
+   * @param  {Object} queryParams.facet.contains - Object containing the facet contains settings.
+   * @param  {String} queryParams.facet.contains.text - Limits the terms used for faceting to those that contain the specified substring.
+   * @param  {Bool}   queryParams.facet.contains.ignoreCase - If facet.contains is used, ignore case when searching for the specified substring.
+   * @param  {Object} queryParams.override - Easy way to override settings for a specific field.
    * @return {Promise} - Resolves when the search finished.
    */
   doSearch(queryParams) {
