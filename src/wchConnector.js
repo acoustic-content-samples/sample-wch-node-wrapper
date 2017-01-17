@@ -231,9 +231,10 @@ class WchSDK {
     let _start = queryParams.start || 0;
     let _fq = queryParams.facetquery || '';
     // Edismax main parser variables
-    let _useEdismax = 'edismax' in queryParams;
-    let _defType = (_useEdismax) ? 'edismax' : 'lucene';
-    let _qf = (_useEdismax) ? queryParams.edismax.queryFields : undefined;
+    let _useDismax = 'dismax' in queryParams;
+    let _dismaxType = (_useDismax && queryParams.dismax.extended) ? 'edismax' : 'dismax';
+    let _defType = (_useDismax) ? _dismaxType : 'lucene';
+    let _qf = (_useDismax) ? queryParams.dismax.queryFields : undefined;
     // Facet specific variables
     let _useFacets = queryParams.facet !== undefined;
     let _facet = queryParams.facet || {};
@@ -250,13 +251,12 @@ class WchSDK {
     let _facetRangeGap = _facetRange.gap || undefined;
     // Override settings for specific fields
     let _override = queryParams.override || {};
-    // WCH specific variables
-    let _isManaged = ('isManaged' in queryParams) ? `isManaged:("${queryParams.isManaged}")` : '';
-
     let f = {};
     for(let key in _override) {
         f['f.'+key] = _override[key];
     }
+    // WCH specific variables
+    let _isManaged = ('isManaged' in queryParams) ? `isManaged:("${queryParams.isManaged}")` : '';
 
     return this.loginstatus.
       then(() => Object.assign({},

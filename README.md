@@ -93,6 +93,62 @@ WCHConnector.doSearch({
 - `queryParams.facetquery` - [Optional] Subquery performed on the results of the main query. The input can also be an array containing multiple facet queries.
 - `queryParams.isManaged` - [Optional] If true the result set only contains on managed elements. If set to false on unmanaged elements are returned. (Only Managed elements are visible in the authoring UI) Default are all elements. No difference between managed an unmanaged.
 
+**Extended Search Options**
+
+For some search scenarios you might find the standard query parser quite cumbersome to use. Especially that the standard query parses enforces a more rigid syntax might be troubeling for searches performed by customers. Therefore there are two other main parsers available with Solr. Those two can also be used for building search queries against WCH. For details about all available parsers have a [look at the Solr documentation][Dismax]. The current state of the sample supports the default 'lucene' parser, the 'dismax' (maximum disjunction) parser and the 'edismax' (extended maximum disjunction) parser. A complete parameter support will come over time.
+
+Another feature supported for extended use cases is faceting. You can use faceting for example if you want to implement [typeahead support][typeaheadsample] against WCH content or if you want to give the user 'drill-down' options to refine the search. You can also use faceting for range exploration as [shown in this example][youractivitysample]. For details reference [the official documentation][Faceting].
+
+[Dismax]: https://cwiki.apache.org/confluence/display/solr/The+DisMax+Query+Parser
+[Faceting]: https://cwiki.apache.org/confluence/display/solr/Faceting
+[typeaheadsample]: https://github.ibm.com/sterbling/sample-wch-node-wrapper/blob/master/samples/typeaheadSample.js
+[youractivitysample]: https://github.ibm.com/sterbling/sample-wch-node-wrapper/blob/master/samples/yourActivitySample.js
+
+```javascript
+WCHConnector.doSearch({
+        query : '*test*',
+        amount : 0,
+        dismax: {
+          extended: true,
+          queryFields: ['name', 'assetType', 'tags', 'status', 'categoryLeaves keywords renditionCount'],
+        },
+        facet: {
+          fields: ['name', 'assetType', 'tags', 'status', 'categoryLeaves', 'keywords', 'creator'],
+          range: {
+            fields: ['created', 'lastModified'],
+            start: 'NOW/DAY-30DAYS',
+            end: 'NOW',
+            gap: '+1DAY'
+          },
+          mincount: 1,
+          limit: 10,
+          contains : {
+            text: 'Test',
+            ignoreCase: true
+          }
+        },
+        override: {
+          'created.facet.mincount': 0, 
+          'lastModified.facet.mincount': 0
+        }
+      });
+```
+- `dismax` - [Optional]
+- `dismax.extended` - [Optional]
+- `dismax.queryFields` - [Required]
+- `facet` - [Optional] 
+- `facet.fields` - [Required]
+- `facet.range` - [Optional]
+- `facet.range.fields` - [Optional]
+- `facet.range.start` - [Optional]
+- `facet.range.end` - [Optional]
+- `facet.range.gap` - [Optional]
+- `facet.mincount` - [Optional]
+- `facet.limit` - [Optional]
+- `facet.contains` - [Optional]
+- `facet.contains.text` - [Optional]
+- `facet.contains.ignoreCase` - [Optional]
+
 ---
 
 ### Resource

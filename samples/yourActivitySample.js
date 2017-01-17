@@ -21,10 +21,14 @@ const wchConnector = require('../index')(wchconfig);
 // In your case this changes to:
 // const wchConnector = require('wchnode')(wchconfig);
 
+// Enter you the name of you in your WCH tenant here and see how many content
+// you've created over the last month. 
+const authorName = 'Author Name';
+
 // A simple facet range query looking for items you've created and modified in the last 
-// 30 days
+// 30 days.
 wchConnector.doSearch({
-        query : 'creator:"Sven Sterbling"',
+        query : 'creator:"'+authorName+'"',
         amount : 0,
         facet: {
           range: {

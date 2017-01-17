@@ -74,7 +74,8 @@ describe('WchConnector', function() {
       return authSDK.doSearch({
         query : '*test*',
         amount : 0,
-        edismax: {
+        dismax: {
+          extended: true;
           queryFields: ['name', 'assetType', 'tags', 'status', 'categoryLeaves keywords renditionCount'],
         },
         facet: {

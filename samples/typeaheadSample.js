@@ -25,7 +25,8 @@ const wchConnector = require('../index')(wchconfig);
 wchConnector.doSearch({
         query : '*test*',
         amount : 0,
-        edismax: {
+        dismax: {
+          extended: true,
           queryFields: ['name', 'assetType', 'tags', 'status', 'categoryLeaves keywords renditionCount'],
         },
         facet: {
