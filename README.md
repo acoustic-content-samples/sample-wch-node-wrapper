@@ -29,8 +29,8 @@ const wchConnector = require('wchnode')({
 
 For more details on how to get started: Have a look at the samples folder where you find a [very simple sample][getstartedsample] on how to initalize and call the connector in your node application. If called correctly (`node ./sample/starterSample.js`) you should see something [like this][getstartedsampleoutput].
 
-[getstartedsample]: https://github.ibm.com/sterbling/sample-wch-node-wrapper/blob/master/samples/starterSample.js
-[getstartedsampleoutput]: https://github.ibm.com/sterbling/sample-wch-node-wrapper/blob/master/samples/startSampleOutput.PNG
+[getstartedsample]: /blob/master/samples/starterSample.js
+[getstartedsampleoutput]: /blob/master/samples/startSampleOutput.PNG
 
 ## Authoring
 Current support of authoring APIs is focused on resources, assets, authoring types and search. This sample is a work in progress. Future updates should allow you to create content items and rendition profiles. Please note that you should only use the authoring APIs for authoring purposes only. They are not optimized for production use cases that might involve high amounts of traffic. 
