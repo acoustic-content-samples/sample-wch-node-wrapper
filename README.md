@@ -133,21 +133,22 @@ WCHConnector.doSearch({
         }
       });
 ```
-- `dismax` - [Optional]
-- `dismax.extended` - [Optional]
-- `dismax.queryFields` - [Required]
-- `facet` - [Optional] 
-- `facet.fields` - [Required]
-- `facet.range` - [Optional]
-- `facet.range.fields` - [Optional]
-- `facet.range.start` - [Optional]
-- `facet.range.end` - [Optional]
-- `facet.range.gap` - [Optional]
-- `facet.mincount` - [Optional]
-- `facet.limit` - [Optional]
-- `facet.contains` - [Optional]
-- `facet.contains.text` - [Optional]
-- `facet.contains.ignoreCase` - [Optional]
+- `dismax` - [Optional] Object containing dismax specific settings. If this param exists dismax parser is enabled.
+- `dismax.extended` - [Optional] Boolean specifing if the extended dismax parsers should be used. Defaults to false (and hence to the dismax parser).
+- `dismax.queryFields` - [Required] The index fields against which the query is evaluated. Can either be a string with multiple fields separated by a space or an array.
+- `facet` - [Optional] Object containing facet specific settings. If this param exists faceting is enabled.
+- `facet.fields` - [Required] The fields which are used for creating the facet. Can either be a string with multiple fields separated by a space or an array.
+- `facet.range` - [Optional] Object containing range specific settings for facets.
+- `facet.range.fields` - [Required] The fields which are used for creating the range facet. Can either be a string with multiple fields separated by a space or an array.
+- `facet.range.start` - [Optional] The starting point to create the range.
+- `facet.range.end` - [Optional] The endpoint of the range.
+- `facet.range.gap` - [Optional] Identifies the steps between a point in the range.
+- `facet.mincount` - [Optional] Specifies the minimum counts required for a facet field to be included in the response.
+- `facet.limit` - [Optional] Controls how many constraints should be returned for each facet.
+- `facet.contains` - [Optional] Object containing the facet contains settings.
+- `facet.contains.text` - [Optional] Limits the terms used for faceting to those that contain the specified substring.
+- `facet.contains.ignoreCase` - [Optional] If facet.contains is used, ignore case when searching for the specified substring.
+- 'override' - [Optional] Easy way to override settings for a specific field.
 
 ---
 
