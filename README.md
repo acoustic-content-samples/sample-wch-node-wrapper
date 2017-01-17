@@ -29,8 +29,8 @@ const wchConnector = require('wchnode')({
 
 For more details on how to get started: Have a look at the samples folder where you find a [very simple sample][getstartedsample] on how to initalize and call the connector in your node application. If called correctly (`node ./sample/starterSample.js`) you should see something [like this][getstartedsampleoutput].
 
-[getstartedsample]: /blob/master/samples/starterSample.js
-[getstartedsampleoutput]: /blob/master/samples/startSampleOutput.PNG
+[getstartedsample]: /samples/starterSample.js
+[getstartedsampleoutput]: /samples/startSampleOutput.PNG
 
 ## Authoring
 Current support of authoring APIs is focused on resources, assets, authoring types and search. This sample is a work in progress. Future updates should allow you to create content items and rendition profiles. Please note that you should only use the authoring APIs for authoring purposes only. They are not optimized for production use cases that might involve high amounts of traffic. 
@@ -101,8 +101,8 @@ Another feature supported for extended use cases is faceting. You can use faceti
 
 [Dismax]: https://cwiki.apache.org/confluence/display/solr/The+DisMax+Query+Parser
 [Faceting]: https://cwiki.apache.org/confluence/display/solr/Faceting
-[typeaheadsample]: https://github.ibm.com/sterbling/sample-wch-node-wrapper/blob/master/samples/typeaheadSample.js
-[youractivitysample]: https://github.ibm.com/sterbling/sample-wch-node-wrapper/blob/master/samples/yourActivitySample.js
+[typeaheadsample]: /samples/typeaheadSample.js
+[youractivitysample]: /samples/yourActivitySample.js
 
 ```javascript
 WCHConnector.doSearch({
@@ -381,7 +381,7 @@ Currently only assets can be delivered.
 
 Convienience method which creates valid delivery urls to resources based on a search query. Per default no distinction is made between assets and web-assets. If you want to restrict the search to only one of those use the `isManaged` search parameter. Have a look at [this sample][resourcedeliverysample] on how the different urltypes look like.
 
-[resourcedeliverysample]: https://github.ibm.com/sterbling/sample-wch-node-wrapper/blob/master/samples/resourceDeliveryUrlSample.js
+[resourcedeliverysample]: /samples/resourceDeliveryUrlSample.js
 
 ```javascript
 WCHConnector.getResourceDeliveryUrls({
