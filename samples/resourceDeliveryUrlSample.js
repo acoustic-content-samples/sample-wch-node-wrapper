@@ -10,6 +10,7 @@
 const env = require('../.env');
 const wchconfig = {
         endpoint: 'authoring',
+        baseUrl: 'https://www.digitalexperience.ibm.com/api/81963bce-85ad-4ef9-9c41-5a76eeba6f59',
         tenantid: env.credentials.tenantid, // Replace with your tenant
         credentials: {
           usrname: env.credentials.usrname, // Replace with your blueid
@@ -30,7 +31,7 @@ urlTypes.forEach(type => {
   wchConnector.getResourceDeliveryUrls({
       urlType: type,
       queryParams: {
-        facetquery: 'name:*TypeTest*',
+        facetquery: 'name:*Lab*',
         amount: 1,
         isManaged: noWebAssets // If you don't want to distinguish between assets and web-assets omit this param completely
       }

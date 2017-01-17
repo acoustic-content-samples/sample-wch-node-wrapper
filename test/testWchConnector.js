@@ -20,7 +20,8 @@ const fs = require('fs');
 const env = require('../.env');
 const authSDK = require('../index')({
         endpoint: 'authoring',
-        tenantid: env.credentials.tenantid,
+        // baseUrl: 'https://www.digitalexperience.ibm.com/api/81963bce-85ad-4ef9-9c41-5a76eeba6f59',
+        // tenantid: env.credentials.tenantid,
         credentials: {
           usrname: env.credentials.usrname,
           pwd: env.credentials.pwd
@@ -32,7 +33,7 @@ const authSDK = require('../index')({
 
 describe('WchConnector', function() {
 
-  describe.only('#init(config)', function() {
+  describe('#init(config)', function() {
     
     it('should initalize against publishing if configuration.endpoint is set to authoring', function() {
       (authSDK.isPublishContext()).should.be.false();
@@ -49,7 +50,7 @@ describe('WchConnector', function() {
     //         .and.have.properties(['numFound', 'documents']);
     // });
 
-    it('should get all content at assets (logged in)', function() {
+    it.only('should get all content at assets (logged in)', function() {
       this.timeout(20000);
       return authSDK.getAllAssetsAndContent()
             .should.eventually.not.be.null()
@@ -69,13 +70,13 @@ describe('WchConnector', function() {
       });
     });
 
-    it.only('should perform a facet query.' , function() {
+    it('should perform a facet query.' , function() {
       this.timeout(20000);
       return authSDK.doSearch({
         query : '*test*',
         amount : 0,
         dismax: {
-          extended: true;
+          extended: true,
           queryFields: ['name', 'assetType', 'tags', 'status', 'categoryLeaves keywords renditionCount'],
         },
         facet: {
@@ -154,7 +155,7 @@ describe('WchConnector', function() {
     it('should be able to upload a new asset based on an new resource', function() {
       let asset = {
         resourceDef: {
-          filePath : path.resolve('test', 'sampleresource.jpg'),
+          filePath : path.resolve('test', 'sämpleresource.jpg'),
           fileName : 'sampleresource.jpg',
           randomId : true
         },
@@ -173,8 +174,8 @@ describe('WchConnector', function() {
     it('should be able to upload a new web asset based on an new resource', function() {
       let asset = {
         resourceDef: {
-          filePath : path.resolve('test', 'sampleresource.jpg'),
-          fileName : 'sampleresource.jpg',
+          filePath : path.resolve('test', 'sample resource.jpg'),
+          fileName : 'sample resource.jpg',
           randomId : false
         },
         assetDef : {

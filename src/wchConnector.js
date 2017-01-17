@@ -22,7 +22,8 @@ const rp = require('request-promise'),
       fs = Promise.promisifyAll(require('fs')),
       path = require('path'),
       crypto = require('crypto'),
-      mime = require('mime-types');
+      mime = require('mime-types'),
+      deepFreeze = require('deep-freeze');
 
 let debug = false;
 const errLogger = err => {if (debug) console.error("Error: ", err); throw err;}
@@ -39,7 +40,8 @@ const wchEndpoints = require('./wchConnectionEndpoints');
 function send(options, retryHandling) {
   return rp(options).
          catch(errLogger).
-         catch(err => retryHandling(err).then(() => rp(options)));
+         catch(err => retryHandling(err).
+         then(() => rp(options)));
 }
 
 /**
@@ -86,7 +88,7 @@ class WchSDK {
     // Request-promise module default options
     this.cookieJar = rp.jar();
     this.options = {
-          baseUrl: `${this.endpoint.baseUrl}/${this.configuration.tenantid}`,
+          baseUrl: this.configuration.baseUrl || `${this.endpoint.baseUrl}`,
           uri: this.endpoint.uri_search,
           qsStringifyOptions: {encode:true},
           agentOptions: {
@@ -101,14 +103,14 @@ class WchSDK {
       };
 
     let creds = this.configuration.credentials;
-    this.loginstatus = (creds) ? this.dologin(creds) : Promise.resolve();
+    this.loginstatus = (creds) ? this.dologin(creds, this.configuration.tenantid) : Promise.resolve(this.configuration.baseUrl);
 
     this.retryHandler = error => {
       if(error.statusCode === '403') {
-        console.log('Auhtentication failed... try login again,');
-        this.loginstatus = this.dologin(creds);
+        console.log('Authentication failed... try login again,');
+        this.loginstatus = this.dologin(creds, this.configuration.tenantid);
       }
-      return this.loginstatus;
+      throw error;
     };
   }
 
@@ -126,22 +128,25 @@ class WchSDK {
    * @param  {String} [credentials.pwd] - The password to the admin user
    * @return {Promise} - Promise resolves with a status indicating success or failure
    */
-  dologin(credentials) {
-    let username = credentials.usrname,
-        pwd = credentials.pwd;
-
+  dologin(credentials, tenantid) {
+    let username = credentials.usrname;
+    let pwd = credentials.pwd;
     let request = Object.assign({}, 
       this.options, 
       {
         uri: this.endpoint.uri_auth,
+        headers: {
+          'x-ibm-dx-tenant-id': tenantid || undefined
+        },
         auth: {
           user: credentials.usrname,
           pass: credentials.pwd
-        }
+        },
+        resolveWithFullResponse: true
     });
-    let loginstatus = rp(request).promise();
-    loginstatus.catch(() => console.log("Login failed..."));
-    return loginstatus;
+    return rp(request).
+          catch(errLogger).
+          then(data => data.headers['x-ibm-dx-tenant-base-url']);
   }
 
   /**
@@ -157,21 +162,22 @@ class WchSDK {
     let urlTypes = {
       id: {
         field:'resource',
-        transform: (baseUrl, tenantid, element, path) => `${baseUrl}/api/${tenantid}${path}/${element.resource}`
+        transform: (baseUrl, path, resource) => `${baseUrl}${path}/${resource}`
       },
       path: {
         field:'path',
-        transform: (baseUrl, tenantid, element, path) => {
-          return `${baseUrl}/api/${tenantid}${path}?path=${element.path}`;
+        transform: (baseUrl, path, resource) => {
+          return `${baseUrl}${path}?path=${resource}`;
         }
       },
       akami: {
         field:'path',
-        transform: (baseUrl, tenantid, element, path) => {
-          return `${baseUrl}/${tenantid}${element.path}`;
+        transform: (baseUrl, path, resource) => {
+          return `${baseUrl.replace('/api', '')}${resource}`;
         }
       }
     }
+
     let searchQry = Object.
     assign(
       {}, 
@@ -181,9 +187,8 @@ class WchSDK {
         fields: urlTypes[urlType].field
       }
     );
-    return this.doSearch(searchQry).
-      then(result => result.documents).
-      map(doc => urlTypes[urlType].transform(wchEndpoints.delivery.akamiUrl, this.configuration.tenantid, doc, wchEndpoints.delivery.uri_resource)).
+    return Promise.join(this.loginstatus, this.doSearch(searchQry), (base, result) => ({baseUrl: base, qry: result.documents})).
+      then(result => result.qry.map((doc) => urlTypes[urlType].transform(result.baseUrl, wchEndpoints.delivery.uri_resource, doc[urlTypes[urlType].field]))).
       then(urlList => (urlList.length === 1) ? urlList[0] : urlList);
   }
 
@@ -242,7 +247,7 @@ class WchSDK {
     // General standard query variables
     let _query = queryParams.query || '*:*';
     let _fields = queryParams.fields || '*';
-    let _amount = ('amount' in queryParams) ? queryParams.amount : 10;
+    let _amount = ('amount' in queryParams && typeof queryParams.amount === 'number') ? queryParams.amount : 10;
     let _sort = queryParams.sort || '';
     let _start = queryParams.start || 0;
     let _fq = queryParams.facetquery || '';
@@ -275,9 +280,10 @@ class WchSDK {
     let _isManaged = ('isManaged' in queryParams) ? `isManaged:("${queryParams.isManaged}")` : '';
 
     return this.loginstatus.
-      then(() => Object.assign({},
+      then((base) => Object.assign({},
         this.options,
         {
+          baseUrl: base, 
           qs: Object.assign({
             q: _query,
             fl: _fields,
@@ -369,12 +375,13 @@ class WchAuthoringSDK extends WchSDK {
     let _fileName = options.fileName || options.filePath;
     let extractedExtname = path.basename(_fileName, path.extname(_fileName));
     let contentType = mime.lookup(path.extname(options.filePath));
-    let resourceId = (_randomId) ? '' : `/${extractedExtname}`;
-    return this.loginstatus.
-      then(() => fs.readFileAsync(options.filePath)).
-      then(fileBuffer => Object.assign({},
+    let resourceId = (_randomId) ? '' : `/${encodeURIComponent(extractedExtname)}`;
+
+    return Promise.join(this.loginstatus, fs.readFileAsync(options.filePath), 
+      (base, fileBuffer) => Object.assign({},
         this.options, 
         {
+          baseUrl: base,
           uri: `${this.endpoint.uri_resource}${resourceId}`,
           method: (_randomId) ? 'POST': 'PUT',
           headers: {
@@ -387,7 +394,7 @@ class WchAuthoringSDK extends WchSDK {
           body: fileBuffer,
           json: false
         })
-      ).
+      ).      
       then(options => send(options, this.retryHandler)).
       then(data => data || { id : extractedExtname });
   }
@@ -409,9 +416,10 @@ class WchAuthoringSDK extends WchSDK {
   createAsset(assetDef) {
     if(!assetDef) new Error('Need a asset definition to upload');
     return this.loginstatus.
-      then(() => Object.assign({}, 
+      then((base) => Object.assign({}, 
         this.options, 
         {
+          baseUrl: base,
           uri: this.endpoint.uri_assets,
           method: 'POST',
           qs: {
@@ -441,10 +449,11 @@ class WchAuthoringSDK extends WchSDK {
   updateAsset(assetDef) {
     if(!assetDef) new Error('Need a asset definition to upload');
     return this.loginstatus.
-      then(() => Object.assign({}, 
+      then((base) => Object.assign({}, 
         this.options, 
         {
-          uri: `${this.endpoint.uri_assets}/${assetDef.id}`,
+          baseUrl: base,
+          uri: `${this.endpoint.uri_assets}/${encodeURIComponent(assetDef.id)}`,
           method: 'PUT',
           qs: {
             analyze: true
@@ -497,9 +506,10 @@ class WchAuthoringSDK extends WchSDK {
    */
   createContentType(typeDefinition) {
     return this.loginstatus.
-       then(() => Object.assign({},
+       then((base) => Object.assign({},
         this.options, 
         {
+          baseUrl: base,
           uri: this.endpoint.uri_types,
           method: 'POST',
           body: typeDefinition
@@ -518,10 +528,11 @@ class WchAuthoringSDK extends WchSDK {
    */
   updateContentType(typeDefinition) {
     return this.loginstatus.
-       then(() => Object.assign({},
+       then((base) => Object.assign({},
         this.options, 
         {
-          uri: this.endpoint.uri_types+'/'+typeDefinition.id,
+          baseUrl: base,
+          uri: this.endpoint.uri_types+'/'+encodeURIComponent(typeDefinition.id),
           method: 'PUT',
           body: typeDefinition
         })
@@ -536,10 +547,11 @@ class WchAuthoringSDK extends WchSDK {
    */
   deleteAsset(assetId) {
     return this.loginstatus.
-      then(() => Object.assign({}, 
+      then((base) => Object.assign({}, 
         this.options, 
         {
-          uri: this.endpoint.uri_assets+'/'+assetId,
+          baseUrl: base,
+          uri: this.endpoint.uri_assets+'/'+encodeURIComponent(assetId),
           method: 'DELETE'
         })
       ).
@@ -584,9 +596,11 @@ class WchAuthoringSDK extends WchSDK {
     let offset = _config.offset || 0;
 
     return this.loginstatus.
-      then(() => Object.assign({},
+      then((base) => Object.assign({},
         this.options, 
-        { uri: `${this.endpoint.uri_categories}/${categoryId}/children`,
+        { 
+          baseUrl: base,
+          uri: `${this.endpoint.uri_categories}/${encodeURIComponent(categoryId)}/children`,
           method: 'GET',
           qs: {
             recurse: true,
@@ -608,9 +622,10 @@ class WchAuthoringSDK extends WchSDK {
    */
   createCategory(categoryDef) {
     return this.loginstatus.
-      then(() => Object.assign({},
+      then((base) => Object.assign({},
         this.options, 
-        { uri: this.endpoint.uri_categories,
+        { baseUrl: base,
+          uri: this.endpoint.uri_categories,
           method: 'POST',
           body: categoryDef
         })).
@@ -624,9 +639,10 @@ class WchAuthoringSDK extends WchSDK {
    */
   deleteCategory(categoryId) {
     return this.loginstatus.
-      then(() => Object.assign({},
+      then((base) => Object.assign({},
         this.options, 
-        { uri: `${this.endpoint.uri_categories}/${categoryId}`,
+        { baseUrl: base,
+          uri: `${this.endpoint.uri_categories}/${encodeURIComponent(categoryId)}`,
           method: 'DELETE'
         })
       ).
