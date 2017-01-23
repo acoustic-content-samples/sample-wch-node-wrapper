@@ -30,6 +30,7 @@ const errLogger = err => {if (debug) console.error("Error: ", err); throw err;}
 
 // Immutable connection endpoints to WCH.
 const wchEndpoints = require('./wchConnectionEndpoints');
+const hashUtils = require('./util/hash');
 
 /**
  * In case of error try to login again. This is a quick-fix. More sophistiacted would be 
@@ -62,6 +63,12 @@ function isAuthoring(configuration) {
 function escapeSolrChars(str) {
   const solrChars = /(\+|\-|\!|\(|\)|\{|\}|\[|\]|\^|\"|\~|\*|\?|\:|\/|\&{2}|\|{2}|\s)/gm;
   return str.replace(solrChars, (match) => match.replace(/(.)/gm, '\\$1') );
+}
+
+function getFileSize(path) {
+  return new Promise((resolve, reject) => {
+    fs.stat(path, (err, data) => (err) ? reject(err) : resolve(data.size));
+  });
 }
 
 /**
@@ -126,7 +133,8 @@ class WchSDK {
    * @param  {Object} credentials - Containing username and password
    * @param  {String} [credentials.usrname] - The blueid for an admin user
    * @param  {String} [credentials.pwd] - The password to the admin user
-   * @return {Promise} - Promise resolves with a status indicating success or failure
+   * @param  {String} [tenantid] - Tenant id for the tenant to do the login for
+   * @return {Promise} - Promise resolves with the WCH baseUrl as String
    */
   dologin(credentials, tenantid) {
     let username = credentials.usrname;
@@ -150,7 +158,8 @@ class WchSDK {
   }
 
   /**
-   * Convenience method to create valid delivery urls to asset resources.
+   * Convenience method to create valid delivery urls to asset resources. This method is mainly for 
+   * the purpose of understanding on how a valid delivery URL can look like. 
    * @param  {Object} options - Options on how to generate the delivery Urls.
    * @param  {String} urlType - Defines the URL type. Valid options are `id`, `path` and `akami`. Default type is id.
    * @param  {Object} queryParams - Refines the query to match for a specific set of assets. All params as in `doSearch` are allowed expect for query and fields. 
@@ -162,18 +171,18 @@ class WchSDK {
     let urlTypes = {
       id: {
         field:'resource',
-        transform: (baseUrl, path, resource) => `${baseUrl}${path}/${resource}`
+        transform: (baseUrl, path, resource) => `${baseUrl}${path}/${encodeURIComponent(resource)}`
       },
       path: {
         field:'path',
         transform: (baseUrl, path, resource) => {
-          return `${baseUrl}${path}?path=${resource}`;
+          return `${baseUrl}${path}?path=${encodeURIComponent(resource)}`;
         }
       },
       akami: {
         field:'path',
         transform: (baseUrl, path, resource) => {
-          return `${baseUrl.replace('/api', '')}${resource}`;
+          return `${baseUrl.replace('/api/', '/')}${encodeURIComponent(resource)}`;
         }
       }
     }
@@ -188,8 +197,7 @@ class WchSDK {
       }
     );
     return Promise.join(this.loginstatus, this.doSearch(searchQry), (base, result) => ({baseUrl: base, qry: result.documents})).
-      then(result => result.qry.map((doc) => urlTypes[urlType].transform(result.baseUrl, wchEndpoints.delivery.uri_resource, doc[urlTypes[urlType].field]))).
-      then(urlList => (urlList.length === 1) ? urlList[0] : urlList);
+      then(result => result.qry.map((doc) => urlTypes[urlType].transform(result.baseUrl, wchEndpoints.delivery.uri_resource, doc[urlTypes[urlType].field])));
   }
 
   /**
@@ -204,12 +212,7 @@ class WchSDK {
    * @return {Promise} - Resolves when the search finished.
    */
   getContentTypeDefinitions(options) {
-    let searchQry = Object.
-      assign(
-        {}, 
-        options, 
-        {query: 'classification:content-type'}
-      );
+    let searchQry = Object.assign({}, options, {query: 'classification:content-type'});
     return this.doSearch(searchQry);
   }
 
@@ -376,26 +379,40 @@ class WchAuthoringSDK extends WchSDK {
     let extractedExtname = path.basename(_fileName, path.extname(_fileName));
     let contentType = mime.lookup(path.extname(options.filePath));
     let resourceId = (_randomId) ? '' : `/${encodeURIComponent(extractedExtname)}`;
+    // Be aware that resources are the binary representation of an asset. Hence these resources
+    // can get rather large in size. Hence this part is implemented as a stream in order to reduce
+    // the memory footprint of this node sample app.
+    
+    let hashStream = fs.createReadStream(options.filePath);
+    let bodyStream = fs.createReadStream(options.filePath);
 
-    return Promise.join(this.loginstatus, fs.readFileAsync(options.filePath), 
-      (base, fileBuffer) => Object.assign({},
+    return Promise.join(this.loginstatus, hashUtils.generateMD5Hash(hashStream), getFileSize(options.filePath),
+      (base, md5file, fileSize) => Object.assign({},
         this.options, 
         {
           baseUrl: base,
           uri: `${this.endpoint.uri_resource}${resourceId}`,
           method: (_randomId) ? 'POST': 'PUT',
           headers: {
-            'Content-Type': contentType
+            'Content-Type': contentType,
+            'Content-Length': fileSize
           },
           qs: {
             name: path.basename(options.filePath),
-            md5: crypto.createHash('md5').update(fileBuffer).digest('base64')
+            md5: md5file
           },
-          body: fileBuffer,
           json: false
         })
       ).      
-      then(options => send(options, this.retryHandler)).
+      then(options => {
+        return new Promise((resolve, reject)=> {
+          let body = '';
+          let request = bodyStream.pipe(rp(options));
+          request.on('data', data => {body += data});
+          request.on('end', () => (body) ? resolve(JSON.parse(body)) : resolve(undefined));
+          request.on('error', reject);
+        });
+      }).
       then(data => data || { id : extractedExtname });
   }
 
@@ -414,7 +431,6 @@ class WchAuthoringSDK extends WchSDK {
    * @return {Promise} - Resolves when the asset is created
    */
   createAsset(assetDef) {
-    if(!assetDef) new Error('Need a asset definition to upload');
     return this.loginstatus.
       then((base) => Object.assign({}, 
         this.options, 
@@ -447,7 +463,6 @@ class WchAuthoringSDK extends WchSDK {
    * @return {Promise} - Resolves when the asset is created
    */
   updateAsset(assetDef) {
-    if(!assetDef) new Error('Need a asset definition to upload');
     return this.loginstatus.
       then((base) => Object.assign({}, 
         this.options, 
@@ -488,7 +503,7 @@ class WchAuthoringSDK extends WchSDK {
         {},
         options.assetDef, 
         {
-          tags: { // Remember: Deep Cloning.
+          tags: {
             values:   options.assetDef.tags.values.splice(0),
             declined: options.assetDef.tags.declined.splice(0),
             analysis: options.assetDef.tags.analysis
@@ -568,7 +583,7 @@ class WchAuthoringSDK extends WchSDK {
    * @return {Promise} - Resolves when all assets are deleted
    */
   deleteAssets(query, amount) {
-    let parallelDeletes = Math.ceil(this.configuration.maxSockets / 5); // Use 1/5th of the connections in parallel
+    let parallelDeletes = Math.ceil(this.configuration.maxSockets / 5); // Use 1/5th of the available connections in parallel
     let amtEle = amount || 100;
     let queue = new Queue(parallelDeletes, amtEle);
     let qryParams = {query: `classification:asset`, facetquery: query, fields:'id', amount: amtEle};

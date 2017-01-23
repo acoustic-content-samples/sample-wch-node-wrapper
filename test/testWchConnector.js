@@ -50,7 +50,7 @@ describe('WchConnector', function() {
     //         .and.have.properties(['numFound', 'documents']);
     // });
 
-    it.only('should get all content at assets (logged in)', function() {
+    it('should get all content at assets (logged in)', function() {
       this.timeout(20000);
       return authSDK.getAllAssetsAndContent()
             .should.eventually.not.be.null()
@@ -184,6 +184,26 @@ describe('WchConnector', function() {
           name: 'ContentTypeTestTest',
           categoryIds:["12fbc71263acc432dbeb5a31b5ce70af"],
           path: '/sample/sampleresource.jpg'
+        }
+      }
+      return authSDK.
+        uploadAsset(asset).
+        then(console.log, console.err);
+    });
+
+    it.only('should be able to upload a large asset', function() {
+      this.timeout(200000);
+      let asset = {
+        resourceDef: {
+          filePath : path.resolve('test', 'sampleresource.jpg'),
+          fileName : 'sampleresource.jpg',
+          randomId : false
+        },
+        assetDef : {
+          tags: {"values":['test', 'upload'],"declined":[], "analysis":"none"},
+          description: 'This is kind of a test upload my dear',
+          name: 'OptimizedVideo',
+          categoryIds:["12fbc71263acc432dbeb5a31b5ce70af"]
         }
       }
       return authSDK.

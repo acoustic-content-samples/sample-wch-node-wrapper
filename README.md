@@ -11,6 +11,7 @@ npm i wchnode -S
 In order to use the connector in your node application you have to initalize the connector first:
 ```node
 const wchConnector = require('wchnode')({
+        baseUrl: 'https://yourwchhostname/somethingelse',
         tenantid: 'YOUR TENANT ID',
         endpoint: 'delivery',
         credentials: {
@@ -20,7 +21,8 @@ const wchConnector = require('wchnode')({
         maxSockets: 50
       });
 ```
-- `tenantid` - [Required] The tenantid of your WCH account. You find the tenantid in the authoring UI after login. Simply click on the info button you'll find on the top left.
+- `baseUrl` - [Optional] 
+- `tenantid` - [Optional] The tenantid of your WCH account. You find the tenantid in the authoring UI after login. Simply click on the info button you'll find on the top left.
 - `endpoint` - [Optional] Choose the api endpoint. The connector either interacts with content in the authoring environment ('authoring') or with delivered content ready for production use cases ('delivery'). Default is 'delivery'.
 - `credentials` - [Optional] Used to authenticate towards content hub. You always have to pass in your credential when choosing the authoring endpoint. Per Default you get anonymous access to the delivery endpoint.
 - `maxSockets` - [Optional] Amount of max open connections per connector instance. Default is 50.
@@ -37,7 +39,21 @@ Current support of authoring APIs is focused on resources, assets, authoring typ
 
 ### Authentication
 
-> `doLogin(credentials)`
+> `doLogin(credentials, tenantid)`
+
+Performs a login with the given credentials agains WCH. Optionally if a tenantid is given login is performed against this tenant. When the login resolves successfully it returns the baseUrl which should be used to perform API calls against.
+
+```javascript
+WCHConnector.doLogin({
+    usrname: 'yourblueid',
+    pwd: 'yourpwd'
+  }, "yourTenantId");
+```
+- `credentials.usrname` - [Required] The blueid for an admin user
+- `credentials.pwd` - [Required] The password to the admin user
+- `tenantid`- [Optional] Tenant id for the tenant to do the login for
+
+**Details about the login process** 
 
 When providing the connector with your credentials this method is called automatically. More generally speaking I want to talk about the two ways (GET or POST) of authentication towards WCH. In this sample connector the GET path is implemented. Since both methods do exactly the same thing it's just a matter of preference.
 

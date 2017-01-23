@@ -9,7 +9,7 @@
  */
 module.exports = {
         authoring : {
-          baseUrl: 'https://www.digitalexperience.ibm.com/api',
+          baseUrl: 'https://www.digitalexperience.ibm.com/api', // Used for login. After that make sure to use endpoint returned on succesful login response.
           uri_search: '/authoring/v1/search',
           uri_auth: '/login/v1/basicauth',
           uri_resource: '/authoring/v1/resources',
