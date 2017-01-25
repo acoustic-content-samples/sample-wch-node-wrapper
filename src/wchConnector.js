@@ -21,9 +21,7 @@ const rp = require('request-promise'),
       Queue = require('promise-queue'),
       fs = Promise.promisifyAll(require('fs')),
       path = require('path'),
-      crypto = require('crypto'),
-      mime = require('mime-types'),
-      deepFreeze = require('deep-freeze');
+      mime = require('mime-types');
 
 let debug = false;
 const errLogger = err => {if (debug) console.error("Error: ", err); throw err;}
@@ -217,9 +215,10 @@ class WchSDK {
   }
 
   /**
-   * Search API access. This should be your go to point when retrieving ANYTHING from 
-   * Content Hub. Why? Because Search API will be available on authoring and delivery soon.
-   * Other convinience APIs like /authoring/v1/assets not so much. 
+   * Search API access. This should be your first access point when retrieving content from WCH. Why? Because the 
+   * Search API will be available on authoring and delivery soon. Hence most of the queries you build can be used in 
+   * both environments.
+   * Other APIs like /authoring/v1/assets might not be aviailable on production for such purposes. 
    * @param  {Object} queryParams - The params object to build a query. Not all params are supported yet!
    * @param  {String} queryParams.query - The main query. Must be a valid SOLR query. Required. Default is all content.
    * @param  {String} queryParams.fields - The fields returned from the search. Default are all fields.
