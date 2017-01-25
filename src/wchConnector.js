@@ -380,7 +380,7 @@ class WchAuthoringSDK extends WchSDK {
     let contentType = mime.lookup(path.extname(options.filePath));
     let resourceId = (_randomId) ? '' : `/${encodeURIComponent(extractedExtname)}`;
     // Be aware that resources are the binary representation of an asset. Hence these resources
-    // can get rather large in size. Hence this part is implemented as a stream in order to reduce
+    // can get rather large in size. That's why this part is implemented as a stream in order to reduce
     // the memory footprint of this node sample app.
     
     let hashStream = fs.createReadStream(options.filePath);

@@ -13,25 +13,15 @@ const crypto = require('crypto');
 const fs = require('fs');
 const hash = crypto.createHash('md5');
 
-function generateMD5Hash(stream, hashEncoding, digestEncoding) {
-  let encoding = digestEncoding || 'base64';
-  let hashType = (crypto.getHashes().indexOf(hashEncoding) > -1) ? hashEncoding : 'md5';
+function generateMD5Hash(stream, hashType, digestEncoding) {
+  let _encoding = digestEncoding || 'base64';
+  let _hashType = (crypto.getHashes().indexOf(hashType) > -1) ? hashType : 'md5';
   
   return new Promise((resolve, reject) => {
-    var hash = crypto.createHash(hashType);
-
-    stream.on('data', function (data) {
-        hash.update(data, 'utf8');
-    });
-
-    stream.on('end', function () {
-        resolve(hash.digest(encoding));
-    });
-
-    stream.on('error', function (error) {
-        reject(error);
-    });
-
+    var hash = crypto.createHash(_hashType);
+    stream.on('data', (data) => hash.update(data, 'utf8'));
+    stream.on('end', () => resolve(hash.digest(_encoding)));
+    stream.on('error', reject);
   });
 }
 

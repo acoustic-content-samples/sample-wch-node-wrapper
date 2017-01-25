@@ -2,11 +2,14 @@
 Node js wrapper around the Watson Content Hub APIs. Coverage will slowly increase. At the moment the authoring APIs are the main focus of this sample. The sample code is well documented and provides you with further details on how to use the connector in your own node project. (Besides it's always a good idea to have a look at the code :) ).
 
 ## How to get started
-The idea is to publish this as soon as possible on npm. Then simply use 
+Install it via npm:
 ```
 npm i wchnode -S
 ``` 
-> Until then you can always include the github repo with `npm i -S git+ssh://git@github.ibm.com:sterbling/wch-node-sdk.git`.
+Or reference it via GitHub:
+```
+npm i -S git+ssh://git@github.com:ibm-wch/sample-wch-node-wrapper.git`.
+```
 
 In order to use the connector in your node application you have to initalize the connector first:
 ```node
