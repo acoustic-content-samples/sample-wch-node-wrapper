@@ -38,3 +38,6 @@ jspm_packages
 
 # File with credentials mainly used for mocha tests
 .env
+
+# In this case we dont want to publish the tests - they are not the focus of this sample... yet :)
+test
