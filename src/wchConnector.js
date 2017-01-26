@@ -72,7 +72,7 @@ function getFileSize(path) {
 /**
  * Class for API access towards Watson Content Hub. ES6 Classes style.
  */
-class WchSDK {
+class WchConnector {
   /**
    * Initalizes the connection to WCH. This module is designed to be
    * instanciated multiple times. E.g. for logged in and anonymous uses 
@@ -86,7 +86,7 @@ class WchSDK {
     this.configuration = Object.assign({
       endpoint: 'delivery',
       rejectUnauthorized: true,
-      maxSockets: 50
+      maxSockets: 10
     }, configuration);
 
     this.endpoint = wchEndpoints[this.configuration.endpoint];
@@ -122,7 +122,7 @@ class WchSDK {
   /**
    * @return {Boolean} - True if the connector targets delivery system, otherwise false.
    */
-  isPublishContext() {
+  isDeliveryContext() {
     return this.configuration.endpoint === 'delivery';
   }
 
@@ -173,17 +173,15 @@ class WchSDK {
       },
       path: {
         field:'path',
-        transform: (baseUrl, path, resource) => {
-          return `${baseUrl}${path}?path=${encodeURIComponent(resource)}`;
-        }
+        transform: (baseUrl, path, resource) => `${baseUrl}${path}?path=${encodeURIComponent(resource)}`
       },
       akami: {
         field:'path',
-        transform: (baseUrl, path, resource) => {
-          return `${baseUrl.replace('/api/', '/')}${encodeURIComponent(resource)}`;
-        }
+        transform: (baseUrl, path, resource) => `${baseUrl.replace('/api/', '/')}${encodeURIComponent(resource)}`
       }
-    }
+    };
+
+    let selectedUrlType = urlTypes[urlType];
 
     let searchQry = Object.
     assign(
@@ -191,11 +189,12 @@ class WchSDK {
       _options.queryParams, 
       {
         query: 'classification:asset',
-        fields: urlTypes[urlType].field
+        fields: selectedUrlType.field
       }
     );
-    return Promise.join(this.loginstatus, this.doSearch(searchQry), (base, result) => ({baseUrl: base, qry: result.documents})).
-      then(result => result.qry.map((doc) => urlTypes[urlType].transform(result.baseUrl, wchEndpoints.delivery.uri_resource, doc[urlTypes[urlType].field])));
+    return Promise.join(this.loginstatus, this.doSearch(searchQry), 
+      (base, result) => ({baseUrl: base, qry: result.documents})).
+      then(result => result.qry.map((doc) => selectedUrlType.transform(result.baseUrl, wchEndpoints.delivery.uri_resource, doc[selectedUrlType.field])));
   }
 
   /**
@@ -204,7 +203,7 @@ class WchSDK {
    * @param  {Object} queryParams - The params object to build a query. Not all params are supported yet!
    * @param  {String} queryParams.fields - The fields returned from the search. Default are all fields.
    * @param  {String} queryParams.facetquery - Query to filter the main result. Cachable. Default is none.
-   * @param  {Number} queryParams.amount - Amount of results returned. Default is 10 elements.
+   * @param  {Number} queryParams.rows - Amount of results returned. Default is 10 elements.
    * @param  {String} queryParams.sort - The order in which results are returned.
    * @param  {Number} queryParams.start - The first element in order to be returned.
    * @return {Promise} - Resolves when the search finished.
@@ -222,7 +221,7 @@ class WchSDK {
    * @param  {Object} queryParams - The params object to build a query. Not all params are supported yet!
    * @param  {String} queryParams.query - The main query. Must be a valid SOLR query. Required. Default is all content.
    * @param  {String} queryParams.fields - The fields returned from the search. Default are all fields.
-   * @param  {Number} queryParams.amount - Amount of results returned. Default is 10 elements.
+   * @param  {Number} queryParams.rows - Amount of results returned. Default is 10 elements.
    * @param  {String} queryParams.sort - The order in which results are returned.
    * @param  {Number} queryParams.start - The first element in order to be returned.
    * @param  {String} queryParams.facetquery - Query to filter the main result. Cachable. Default is none.
@@ -249,7 +248,7 @@ class WchSDK {
     // General standard query variables
     let _query = queryParams.query || '*:*';
     let _fields = queryParams.fields || '*';
-    let _amount = ('amount' in queryParams && typeof queryParams.amount === 'number') ? queryParams.amount : 10;
+    let _rows = ('rows' in queryParams && typeof queryParams.rows === 'number') ? queryParams.rows : 10;
     let _sort = queryParams.sort || '';
     let _start = queryParams.start || 0;
     let _fq = queryParams.facetquery || '';
@@ -290,7 +289,7 @@ class WchSDK {
             q: _query,
             fl: _fields,
             fq: new Array().concat(_fq, _isManaged),
-            rows: _amount,
+            rows: _rows,
             sort: _sort,
             start: _start,
             defType: _defType,
@@ -319,28 +318,28 @@ class WchSDK {
         _filter = filter || '';
     return this.doSearch({
             query: `id:${_filter}${_type}\\:${_id}`,
-            amount: 1
+            rows: 1
         });
   }
 
-  getAllAssetsAndContent(filter, amount, sortAsc) {
+  getAllAssetsAndContent(filter, rows, sortAsc) {
     var _filter = (filter) ? ' '+filter : '',
         _sort = `lastModified ${(sortAsc) ? 'asc' : 'desc'}`;
     return this.doSearch({
       query: '*:*',
       facetquery: _filter, 
-      amount: amount,
+      rows: rows,
       sort: _sort
     });
   }
 
-  getAllContentOfType(type, amount, sortAsc, start) {
+  getAllContentOfType(type, rows, sortAsc, start) {
     var _filter = (type) ? ' AND type:'+type : '',
         _sort = `lastModified ${(sortAsc) ? 'asc' : 'desc'}`;
 
     return this.doSearch({
       query: `classification:content${_filter}`, 
-      amount: amount,
+      rows: rows,
       sort: _sort,
       start: start
     });
@@ -350,7 +349,7 @@ class WchSDK {
     var _filter = (name) ? ' AND name:'+name : '';
     return this.doSearch({
       query: `classification:image-profile${_filter}`, 
-      amount: 1
+      rows: 1
     });
   }
 
@@ -360,7 +359,7 @@ class WchSDK {
  * Class containing all authoring only API methods. Rule of thumb: All create, update & delete
  * methods are only available in authoring.
  */
-class WchAuthoringSDK extends WchSDK {
+class WchAuthoringConnector extends WchConnector {
 
   /**
    * Create a resource with the given filename. Fallback is resource name. You can also decide to get a random
@@ -578,14 +577,14 @@ class WchAuthoringSDK extends WchSDK {
   /**
    * Deletes the specified amount of assets matching the query.
    * @param  {String}  query  - Facet query specifing the assets to be deleted
-   * @param  {Integer} amount - Amount of elements that will be deleted
+   * @param  {Integer} rows - Amount of elements that will be deleted
    * @return {Promise} - Resolves when all assets are deleted
    */
-  deleteAssets(query, amount) {
+  deleteAssets(query, rows) {
     let parallelDeletes = Math.ceil(this.configuration.maxSockets / 5); // Use 1/5th of the available connections in parallel
-    let amtEle = amount || 100;
+    let amtEle = rows || 100;
     let queue = new Queue(parallelDeletes, amtEle);
-    let qryParams = {query: `classification:asset`, facetquery: query, fields:'id', amount: amtEle};
+    let qryParams = {query: `classification:asset`, facetquery: query, fields:'id', rows: amtEle};
     return this.doSearch(qryParams).
             then(data => (data.documents) ? data.documents : []).
             map(document => (document.id.startsWith('asset:')) ? document.id.substring('asset:'.length) : document.id).
@@ -704,12 +703,12 @@ class WchAuthoringSDK extends WchSDK {
   /**
    * Deletes all taxonomies matched by this query. If the query is empty all taxonomies will get deleted.
    * @param  {String} query - A valid solr facet query element specifing the taxonomies to delete. 
-   * @param  {Number} amount - the amount of matched elements to get deleted.
+   * @param  {Number} rows - the amount of matched elements to get deleted.
    * @return {Promise} - Resolves when all matched elements are deleted. 
    */
-  deleteTaxonomies(query, amount) {
-    let amtEle = amount || 100;
-    let qryParams = {query: 'classification:taxonomy', facetquery: query, fields:'id', amount: amtEle};
+  deleteTaxonomies(query, rows) {
+    let amtEle = rows || 100;
+    let qryParams = {query: 'classification:taxonomy', facetquery: query, fields:'id', rows: amtEle};
     return this.doSearch(qryParams).
       then(data => (data.documents) ? data.documents : []).
       map(document => (document.id.startsWith('taxonomy:')) ? document.id.substring('taxonomy:'.length) : document.id).
@@ -725,5 +724,5 @@ class WchAuthoringSDK extends WchSDK {
  * @return {Object} - Wrapper to common API calls towards Watson Content Hub
  */
 module.exports = function(config) {
-  return (config.endpoint === 'delivery') ? new WchSDK(config) : new WchAuthoringSDK(config);
+  return (config.endpoint === 'delivery') ? new WchConnector(config) : new WchAuthoringConnector(config);
 }

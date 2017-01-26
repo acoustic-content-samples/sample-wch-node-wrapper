@@ -9,7 +9,7 @@
  */
 module.exports = {
         authoring : {
-          baseUrl: 'https://www.digitalexperience.ibm.com/api', // Used for login. After that make sure to use endpoint returned on succesful login response.
+          baseUrl: 'https://my.digitalexperience.ibm.com/api', // Used for login. After that make sure to use endpoint returned on succesful login response.
           uri_search: '/authoring/v1/search',
           uri_auth: '/login/v1/basicauth',
           uri_resource: '/authoring/v1/resources',
@@ -19,7 +19,7 @@ module.exports = {
         },
         delivery :  {
           akamiUrl: 'https://my.digitalexperience.ibm.com',
-          baseUrl: 'https://www.digitalexperience.ibm.com/api',
+          baseUrl: 'https://my.digitalexperience.ibm.com/api',
           uri_resource: '/delivery/v1/resources',
           // At the moment there is no delivery system for search and auth 
           // hence the endpoints are the same as in authoring... TODO

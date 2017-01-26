@@ -14,21 +14,20 @@ npm i -S git+ssh://git@github.com:ibm-wch/sample-wch-node-wrapper.git`.
 In order to use the connector in your node application you have to initalize the connector first:
 ```node
 const wchConnector = require('wchnode')({
-        baseUrl: 'https://yourwchhostname/somethingelse',
         tenantid: 'YOUR TENANT ID',
-        endpoint: 'delivery',
+        endpoint: 'authoring',
         credentials: {
           usrname: 'YOUR BLUEID USER',
           pwd: 'YOUR BLUEID PASSWORD'
         },
-        maxSockets: 50
+        maxSockets: 10
       });
 ```
-- `baseUrl` - [Optional] 
+- `baseUrl` - [Optional] The base URL for the WCH API calls in anonymous use cases. Be aware that after a succesful login the base URL might change based on the login response. For details have a look at the login section. Defaults to https://my.digitalexperience.ibm.com/api.
 - `tenantid` - [Optional] The tenantid of your WCH account. You find the tenantid in the authoring UI after login. Simply click on the info button you'll find on the top left.
 - `endpoint` - [Optional] Choose the api endpoint. The connector either interacts with content in the authoring environment ('authoring') or with delivered content ready for production use cases ('delivery'). Default is 'delivery'.
 - `credentials` - [Optional] Used to authenticate towards content hub. You always have to pass in your credential when choosing the authoring endpoint. Per Default you get anonymous access to the delivery endpoint.
-- `maxSockets` - [Optional] Amount of max open connections per connector instance. Default is 50.
+- `maxSockets` - [Optional] Amount of max open connections per connector instance. Default is 10.
 
 > **NOTE:** You can instantiate the connector multiple times e.g. to access different tenants at the same time. (Or the same tenant against different endpoints or with different user roles)
 
@@ -44,7 +43,7 @@ Current support of authoring APIs is focused on resources, assets, authoring typ
 
 > `doLogin(credentials, tenantid)`
 
-Performs a login with the given credentials agains WCH. Optionally if a tenantid is given login is performed against this tenant. When the login resolves successfully it returns the baseUrl which should be used to perform API calls against.
+Performs a login with the given credentials agains WCH. Optionally if a tenantid is given login is performed against this tenant. When the login resolves successfully it returns the baseUrl which should be used to perform all further API calls.
 
 ```javascript
 WCHConnector.doLogin({
@@ -97,7 +96,7 @@ WCHConnector.doSearch({
         query : '*:*',
         fields: 'creator, lastModified, classification',
         facetquery : ['classification:asset', 'lastModified:[2016-12-20T09:15:25.882Z TO NOW]'],
-        amount : 30,
+        rows : 30,
         sort : 'creator asc, lastModified desc',
         start : 5
       });
@@ -106,9 +105,9 @@ WCHConnector.doSearch({
 - `queryParams` - [Required] The search query object passed into the method.
 - `queryParams.query` - [Optional] The main query. Must be a valid Solr query. Defaults to query for all content.  
 - `queryParams.fields` - [Optional] Comma separated list of fiels to get returned in the search result. Default is set to all available fields.
-- `queryParams.amount` - [Optional] The amount of documents that will be returned in the search result. Defaults to 10 documents matching the query.
+- `queryParams.rows` - [Optional] The amount of documents that will be returned in the search result. Defaults to 10 documents matching the query.
 - `queryParams.sort` - [Optional] Define a valid Solr sort criteria based on a valid index. Can also contain multiple indexes. Sortable either asc (ascending) or desc (descending)
-- `queryParams.start` - [Optional] The starting point after sorting from where to return the number of elements defined in `amount`. Default starting point is index 0. 
+- `queryParams.start` - [Optional] The starting point after sorting from where to return the number of elements defined in `rows`. Default starting point is index 0. 
 - `queryParams.facetquery` - [Optional] Subquery performed on the results of the main query. The input can also be an array containing multiple facet queries.
 - `queryParams.isManaged` - [Optional] If true the result set only contains on managed elements. If set to false on unmanaged elements are returned. (Only Managed elements are visible in the authoring UI) Default are all elements. No difference between managed an unmanaged.
 
@@ -126,7 +125,7 @@ Another feature supported for extended use cases is faceting. You can use faceti
 ```javascript
 WCHConnector.doSearch({
         query : '*test*',
-        amount : 0,
+        rows : 0,
         dismax: {
           extended: true,
           queryFields: ['name', 'assetType', 'tags', 'status', 'categoryLeaves keywords renditionCount'],
@@ -204,7 +203,7 @@ Deletes a single asset from WCH. Note: The linked resource will only be deleted 
 
 - `resourceDef.randomId` - [Required] The ID of the asset to be deleted
 
-> `deleteAssets(query, amount)`
+> `deleteAssets(query, rows)`
 
 Deletes the specified amount of assets matching the query.
 
@@ -214,7 +213,7 @@ Deletes the specified amount of assets matching the query.
 ```
 
 - `query` - [Required] The assetquery used to select the assets to get deleted. Can also be an array of multiple facetqueries.
-- `amount` - [Optional] Amount of assets to get deleted. Defaults to 100.
+- `rows` - [Optional] Amount of assets to get deleted. Defaults to 100.
 
 > `createAsset(assetDef)`
 
@@ -387,7 +386,7 @@ WCHConnector.createTaxonomies(taxonomyDef);
 
 Deletes a category based on its it. Will also delete all subcategories. Hence if you want to delete a taxonomy delete the root category.
 
-> `deleteTaxonomies(query, amount)`
+> `deleteTaxonomies(query, rows)`
 
 Convienience method which can be used to delete one or multiple taxonomies based on a search query. For details on how to define a query have a look at the search section.
 
@@ -407,7 +406,7 @@ WCHConnector.getResourceDeliveryUrls({
   urlType: 'akami',
   queryParams: {
     facetquery: 'name:*TypeTest*',
-    amount: 1,
+    rows: 1,
     isManaged: false
   }
 });

@@ -7,6 +7,10 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the 
  * specific language governing permissions and limitations under the License.
  */
+'use strict'
+
+// I've placed my credentials in a separate .env file. You can remove this line and
+// add your credentials directly to the wchconfig variable down below. 
 const env = require('../.env');
 const wchconfig = {
         endpoint: 'authoring',
@@ -21,7 +25,7 @@ const wchconfig = {
 // Since I'm in the sample directly I directly requre the entry point...
 const wchConnector = require('../index')(wchconfig); 
 // In your case this changes to:
-// const wchConnector = require('wchnode')(wchconfig);
+// const wchConnector = require('sample-wch-node-connector')(wchconfig);
 
 // All available URL types
 const urlTypes = ['id', 'path', 'akami'];
@@ -32,7 +36,7 @@ urlTypes.forEach(type => {
       urlType: type,
       queryParams: {
         facetquery: 'name:*Lab*',
-        amount: 1,
+        rows: 1,
         isManaged: noWebAssets // If you don't want to distinguish between assets and web-assets omit this param completely
       }
     }).
