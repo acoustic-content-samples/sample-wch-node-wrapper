@@ -4,7 +4,7 @@ Node js wrapper around the Watson Content Hub APIs. Coverage will slowly increas
 ## How to get started
 Install it via npm:
 ```
-npm i wchnode -S
+npm i sample-wch-node-wrapper -S
 ``` 
 Or reference it via GitHub:
 ```
@@ -13,7 +13,7 @@ npm i -S git+ssh://git@github.com:ibm-wch/sample-wch-node-wrapper.git`.
 
 In order to use the connector in your node application you have to initalize the connector first:
 ```node
-const wchConnector = require('wchnode')({
+const wchWrapper = require('sample-wch-node-wrapper')({
         tenantid: 'YOUR TENANT ID',
         endpoint: 'authoring',
         credentials: {
@@ -46,7 +46,7 @@ Current support of authoring APIs is focused on resources, assets, authoring typ
 Performs a login with the given credentials agains WCH. Optionally if a tenantid is given login is performed against this tenant. When the login resolves successfully it returns the baseUrl which should be used to perform all further API calls.
 
 ```javascript
-WCHConnector.doLogin({
+wchWrapper.doLogin({
     usrname: 'yourblueid',
     pwd: 'yourpwd'
   }, "yourTenantId");
@@ -92,7 +92,7 @@ Performs a search against all content on the authoring environment. The query is
 [SolrQry]: https://cwiki.apache.org/confluence/display/solr/Query+Syntax+and+Parsing
 
 ```javascript
-WCHConnector.doSearch({
+wchWrapper.doSearch({
         query : '*:*',
         fields: 'creator, lastModified, classification',
         facetquery : ['classification:asset', 'lastModified:[2016-12-20T09:15:25.882Z TO NOW]'],
@@ -123,7 +123,7 @@ Another feature supported for extended use cases is faceting. You can use faceti
 [youractivitysample]: /samples/yourActivitySample.js
 
 ```javascript
-WCHConnector.doSearch({
+wchWrapper.doSearch({
         query : '*test*',
         rows : 0,
         dismax: {
@@ -179,7 +179,7 @@ Resources are not directly visible in the authoring UI. But if you want to uploa
 Uploads a resource to WCH. Make sure to link the resource to an asset afterwards. Be aware that the binaries of a resource can't get updated here. It's only possible to update metadata of resources. For use cases requiring an update have a look at the assets section. 
 
 ```javascript
-WCHConnector.createResource({
+wchWrapper.createResource({
         filePath : 'Absolute/Path/To/YourFileToUpload.jpeg',
         fileName : 'nameinwch.whateveryoulike',
         randomId : true
@@ -209,7 +209,7 @@ Deletes the specified amount of assets matching the query.
 
 ```javascript
   let deleteQry = 'name:*Calendar* AND document:*Test*';
-  WCHConnector.deleteAssets(deleteQry, 100);
+  wchWrapper.deleteAssets(deleteQry, 100);
 ```
 
 - `query` - [Required] The assetquery used to select the assets to get deleted. Can also be an array of multiple facetqueries.
@@ -227,7 +227,7 @@ Creates a new asset definition. If you set the path attribute the asset will be 
     name: 'NameOfTheAsset',
     resource: 'ID to an existing resource'
   };
-  WCHConnector.createAsset(assetDef);
+  wchWrapper.createAsset(assetDef);
 ```
 
 - `assetDef` - [Required] Valid WCH definition of an asset.
@@ -253,7 +253,7 @@ Updates an existing asset definition.
     name: 'NameOfTheAsset',
     resource: 'ID to an existing resource'
   };
-  WCHConnector.updateAsset(assetDef);
+  wchWrapper.updateAsset(assetDef);
 ```
 
 - `assetDef` - [Required] Valid WCH definition of an asset.
@@ -285,7 +285,7 @@ Convenience method which uploads and creates a resource and afterwards an asset 
           categoryIds:["IDOFACATEGORY"]
         } 
   }
-  WCHConnector.uploadAsset(asset);
+  wchWrapper.uploadAsset(asset);
 ```
 
 - `options` - [Required] Valid WCH definition of an asset.
@@ -337,7 +337,7 @@ Query method to get the tree of sub categories based on a starting category. A g
 The taxonomy API is based around the simple category API endpoint. This allows you to create standalone categories based on the following definition:
 
 ```javascript
-WCHConnector.createCategory({
+wchWrapper.createCategory({
   name: "NAMEOFTHECATEGORY",
   parent: "PARENTCATEGORY"
 });
@@ -374,7 +374,7 @@ Taxonomy Definition:
 Connector Call:
 ```javascript
 let taxonomyDef = ... // Load the taxonomy definition
-WCHConnector.createTaxonomies(taxonomyDef);
+wchWrapper.createTaxonomies(taxonomyDef);
 ```
 
 - `name` - [Required] If you want to create the first level of a taxonomy including its name.
@@ -402,7 +402,7 @@ Convienience method which creates valid delivery urls to resources based on a se
 [resourcedeliverysample]: /samples/resourceDeliveryUrlSample.js
 
 ```javascript
-WCHConnector.getResourceDeliveryUrls({
+wchWrapper.getResourceDeliveryUrls({
   urlType: 'akami',
   queryParams: {
     facetquery: 'name:*TypeTest*',

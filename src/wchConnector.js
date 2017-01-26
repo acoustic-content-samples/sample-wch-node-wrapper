@@ -19,7 +19,7 @@
 const rp = require('request-promise'),
       Promise = require('bluebird'),
       Queue = require('promise-queue'),
-      fs = Promise.promisifyAll(require('fs')),
+      fs = require('fs'),
       path = require('path'),
       mime = require('mime-types');
 
@@ -29,10 +29,11 @@ const errLogger = err => {if (debug) console.error("Error: ", err); throw err;}
 // Immutable connection endpoints to WCH.
 const wchEndpoints = require('./wchConnectionEndpoints');
 const hashUtils = require('./util/hash');
+const fileUtils = require('./util/file');
 
 /**
  * In case of error try to login again. This is a quick-fix. More sophistiacted would be 
- * to obseve the expiry date of the authentication cookie... clearly a TODO.
+ * to observe the expiry date of the authentication cookie... clearly a TODO.
  * @param  {Object} options - Request-Promise options Object(value?: any)
  * @return {Promise} - Waiting for the response
  */
@@ -44,15 +45,6 @@ function send(options, retryHandling) {
 }
 
 /**
- * Checks the current configuration for authoring environment
- * @param  {Object}  configuration - The connector config
- * @return {Boolean} - true if its authoring, otherwise false
- */
-function isAuthoring(configuration) {
-  return configuration.endpoint === 'authoring'
-}
-
-/**
  * Simple solr special char escaper. Based on 
  * https://cwiki.apache.org/confluence/display/solr/The+Standard+Query+Parser
  * @param  {String} str - The string to escape
@@ -61,12 +53,6 @@ function isAuthoring(configuration) {
 function escapeSolrChars(str) {
   const solrChars = /(\+|\-|\!|\(|\)|\{|\}|\[|\]|\^|\"|\~|\*|\?|\:|\/|\&{2}|\|{2}|\s)/gm;
   return str.replace(solrChars, (match) => match.replace(/(.)/gm, '\\$1') );
-}
-
-function getFileSize(path) {
-  return new Promise((resolve, reject) => {
-    fs.stat(path, (err, data) => (err) ? reject(err) : resolve(data.size));
-  });
 }
 
 /**
@@ -384,7 +370,7 @@ class WchAuthoringConnector extends WchConnector {
     let hashStream = fs.createReadStream(options.filePath);
     let bodyStream = fs.createReadStream(options.filePath);
 
-    return Promise.join(this.loginstatus, hashUtils.generateMD5Hash(hashStream), getFileSize(options.filePath),
+    return Promise.join(this.loginstatus, hashUtils.generateMD5Hash(hashStream), fileUtils.getFileSize(options.filePath),
       (base, md5file, fileSize) => Object.assign({},
         this.options, 
         {
