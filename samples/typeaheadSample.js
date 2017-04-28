@@ -13,20 +13,20 @@
 // add your credentials directly to the wchconfig variable down below. 
 const env = require('../.env');
 const wchconfig = {
-        endpoint: 'authoring',
+        endpoint: 'delivery',
         tenantid: env.credentials.tenantid, // Replace with your tenant
-        credentials: {
-          usrname: env.credentials.usrname, // Replace with your blueid
-          pwd: env.credentials.pwd // Replace with your password
+        credentials: { 
+          usrname: env.credentials.usrname, // Credentials not needed for delivery 
+          pwd: env.credentials.pwd // ... but you can leave them here...
         }
       };
 // Since I'm in the sample directly I directly require the entry point...
-const wchConnector = require('../index')(wchconfig); 
+const wchConnector = require('../src/index')(wchconfig); 
 // In your case this changes to:
 // const wchConnector = require('sample-wch-node-connector')(wchconfig);
 
 // A simple typeahead solution based on facets
-wchConnector.doSearch({
+wchConnector.search.query({
         query : '*test*',
         rows : 0,
         dismax: {
@@ -34,7 +34,7 @@ wchConnector.doSearch({
           queryFields: ['name', 'assetType', 'tags', 'status', 'categoryLeaves keywords renditionCount'],
         },
         facet: {
-          fields: ['name', 'assetType', 'tags', 'status', 'categories', 'categoryLeaves', 'keywords'],
+          fields: ['name', 'assetType', 'tags', 'categories', 'categoryLeaves', 'keywords'],
           mincount: 1,
           limit: 3,
           contains : {

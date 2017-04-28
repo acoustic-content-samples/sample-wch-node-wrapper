@@ -8,7 +8,6 @@
  * specific language governing permissions and limitations under the License.
  */
 'use strict';
-const Promise = require('bluebird');
 const fs = require('fs');
 
 function getFileSize(path) {

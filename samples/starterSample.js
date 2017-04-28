@@ -13,20 +13,16 @@
 // add your credentials directly to the wchconfig variable down below. 
 const env = require('../.env');
 const wchconfig = {
-        endpoint: 'authoring',
-        tenantid: env.credentials.tenantid, // Replace with your tenant
-        credentials: {
-          usrname: env.credentials.usrname, // Replace with your blueid
-          pwd: env.credentials.pwd // Replace with your password
-        }
+        endpoint: 'delivery',
+        baseUrl: env.credentials.baseurl // The API Url
       };
 // Since I'm in the sample directly I directly require the entry point...
-const wchConnector = require('../index')(wchconfig); 
+const wchConnector = require('../src/index')(wchconfig);
 // In your case this changes to:
 // const wchConnector = require('sample-wch-node-connector')(wchconfig);
 
 // A simple query against authoring... feel free to play around
-wchConnector.doSearch({
+wchConnector.search.query({
         query : '*:*',
         fields: 'creator, lastModified, classification',
         facetquery : ['classification:asset', 'lastModified:[2016-12-20T09:15:25.882Z TO NOW]'],
