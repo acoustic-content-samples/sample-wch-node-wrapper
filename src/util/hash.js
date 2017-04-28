@@ -8,7 +8,7 @@
  * specific language governing permissions and limitations under the License.
  */
 'use strict';
-const Promise = require('bluebird');
+// const Promise = require('bluebird');
 const crypto = require('crypto');
 const fs = require('fs');
 const hash = crypto.createHash('md5');

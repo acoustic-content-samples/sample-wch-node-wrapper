@@ -37,7 +37,7 @@ jspm_packages
 .node_repl_history
 
 # File with credentials mainly used for mocha tests
-.env
+/.env
+/.env.js
 
-# In this case we dont want to publish the tests - they are not the focus of this sample... yet :)
-test
+/.idea

@@ -14,33 +14,17 @@
 const env = require('../.env');
 const wchconfig = {
         endpoint: 'authoring',
-        tenantid: env.credentials.tenantid, // Replace with your tenant
+        tenantid: 'd06858c4-adfa-4619-9666-c931ea2db089', // Replace with your tenant
         credentials: {
-          usrname: env.credentials.usrname, // Replace with your blueid
-          pwd: env.credentials.pwd // Replace with your password
+          usrname: 'wchhackaton+team4@gmail.com', // Replace with your blueid
+          pwd: 'wchhackatonteam4' // Replace with your password
         }
       };
-// Since I'm in the sample directly I directly require the entry point...
-const wchConnector = require('../src/index')(wchconfig); 
+
+// Since I'm in the sample directly I directly requre the entry point...
+const wchConnector = require('../index')(wchconfig); 
 // In your case this changes to:
 // const wchConnector = require('sample-wch-node-connector')(wchconfig);
 
-// Enter you the name of you in your WCH tenant here and see how many content
-// you've created over the last month. 
-const authorName = 'Author Name';
-
-// A simple facet range query looking for items you've created and modified in the last 
-// 30 days.
-wchConnector.search.query({
-        query : 'creator:"'+authorName+'"',
-        rows : 0,
-        facet: {
-          range: {
-            fields: ['created', 'lastModified'],
-            start: 'NOW/DAY-30DAYS',
-            end: 'NOW',
-            gap: '+1DAY'
-          },
-          mincount: 0
-        }
-      }).then(data => console.log(data.facet_ranges));
+wchConnector.deleteTaxonomies('*:*').
+then(console.log);

@@ -15,7 +15,8 @@ module.exports = {
           uri_resource: '/authoring/v1/resources',
           uri_assets: '/authoring/v1/assets',
           uri_types: '/authoring/v1/types',
-          uri_categories: '/authoring/v1/categories'
+          uri_categories: '/authoring/v1/categories',
+          uri_content: '/authoring/v1/content'
         },
         delivery :  {
           akamiUrl: 'https://my.digitalexperience.ibm.com',
@@ -23,7 +24,7 @@ module.exports = {
           uri_resource: '/delivery/v1/resources',
           // At the moment there is no delivery system for search and auth 
           // hence the endpoints are the same as in authoring... TODO
-          uri_search: '/authoring/v1/search',
+          uri_search: '/delivery/v1/search',
           uri_auth:   '/login/v1/basicauth'
         }
       };

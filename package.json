@@ -7,25 +7,24 @@
   "author": "Sven Sterbling <sterbling@de.ibm.com>",
   "scripts": {
     "start": "echo 'npm package'",
-    "test": "node node_modules/mocha/bin/mocha"
+    "test": "mocha"
   },
   "dependencies": {
-    "async": "^2.1.2",
-    "bluebird": "^3.4.6",
     "mime-types": "^2.1.12",
     "promise-queue": "^2.2.3",
-    "request": "^2.75.0",
-    "request-promise": "^4.1.1"
+    "request-promise-native": "^1.0.3",
+    "request":"^2.34"
   },
   "devDependencies": {
-    "mocha": "^3.1.2",
-    "should": "^11.1.1"
+    "eslint": "^3.18.0",
+    "expect.js": "^0.3.1",
+    "mocha": "^3.2.0"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:ibm-wch/sample-wch-node-wrapper.git"
   },
   "engines": {
-    "node": "4.x"
+    "node": ">=6.9"
   }
 }
