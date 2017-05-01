@@ -19,9 +19,6 @@
 /// and add common search patterns to the query.
 
 // Immutable connection endpoints to WCH.
-const wchEndpoints = require('./wchConnectionEndpoints');
-const hashUtils = require('./util/hash');
-const fileUtils = require('./util/file');
 const WchConnector = require('./WchConnector');
 const WchAuthoringConnector = require('./WchAuthoringConnector');
 

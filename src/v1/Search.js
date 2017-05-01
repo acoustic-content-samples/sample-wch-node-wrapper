@@ -10,7 +10,7 @@
 
 'use strict';
 
-const wchEndpoints = require('./wchConnectionEndpoints');
+const wchEndpoints = require('../util/wchConnectionEndpoints');
 
 /**
  * Simple solr special char escaper. Based on
@@ -169,6 +169,20 @@ class Search{
     }
 
     /**
+     * Convenience filter to filter the resultset for taxonomies.
+     * @param  {queryParams} queryParams - See query method for all available params
+     * @return {Promise} Resolves when the query result is available.
+     */
+    taxonomies(queryParams) {
+      let filter = Object.assign({},
+        queryParams,
+        {
+          query: 'classification:taxonomy'
+        });
+      return this.query(filter);
+    }
+
+    /**
      * Getter for content type definitions. Simple wrapper around search API.
      * All params allowed as in query except for query which is predefined.
      * @param  {Object} queryParams - The params object to build a query. Not all params are supported yet!
@@ -203,6 +217,7 @@ class Search{
             start: start
         });
     }
+
     contentById(type, id, filter) {
         var _type = escapeSolrChars(type) || '',
             _id = escapeSolrChars(id) || '',
