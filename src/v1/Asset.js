@@ -15,9 +15,8 @@ const fs = require('fs');
 const rp = require('request-promise-native');
 const mime = require('mime-types');
 const Queue = require('promise-queue');
-const wchEndpoints = require('./wchConnectionEndpoints');
-const hashUtils = require('./util/hash');
-const fileUtils = require('./util/file');
+const hashUtils = require('../util/hash');
+const fileUtils = require('../util/file');
 
 class Asset {
     constructor({wchConnector}){
@@ -70,7 +69,7 @@ class Asset {
                 })
         ).
         then(options => {
-            return new Promise((resolve, reject)=> {
+            return new Promise((resolve, reject) => {
                 let body = '';
                 let request = bodyStream.pipe(rp(options));
                 request.on('data', data => {body += data});
@@ -186,7 +185,7 @@ class Asset {
      */
     delete(assetId) {
         return this.connector.loginstatus.
-        then((base) => Object.assign({},
+        then(base => Object.assign({},
             this.connector.options,
             {
                 baseUrl: base,
