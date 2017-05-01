@@ -1,6 +1,6 @@
 {
   "name": "sample-wch-node-wrapper",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "private": false,
   "main": "index.js",
   "license": "Apache-2.0",
@@ -13,7 +13,7 @@
     "mime-types": "^2.1.12",
     "promise-queue": "^2.2.3",
     "request-promise-native": "^1.0.3",
-    "request":"^2.34"
+    "request": "^2.34"
   },
   "devDependencies": {
     "eslint": "^3.18.0",
