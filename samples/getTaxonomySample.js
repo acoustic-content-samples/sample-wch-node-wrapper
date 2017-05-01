@@ -25,5 +25,5 @@ const wchConnector = require('../index')(wchconfig);
 // In your case this changes to:
 // const wchConnector = require('sample-wch-node-connector')(wchconfig);
 
-wchConnector.taxonomy.deleteTaxonomies('name:mycool*').
-then(console.log);
+wchConnector.taxonomy.getTaxonomy({facetquery: 'name:mycool*'}).
+then(objTax => console.log(JSON.stringify(objTax, null, 1)));
