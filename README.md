@@ -85,14 +85,14 @@ Body:
 
 ### Search
 
-> `doSearch(queryParams)`
+> `query(queryParams)`
 
 Performs a search against all content on the authoring environment. The query is based [on Solr][SolrQry]. Hence you should have a look at their documentation for further information on how to create a valid query. Make sure to escape your query properly. See the simple helper method `escapeSolrChars` on how to do so.
 
 [SolrQry]: https://cwiki.apache.org/confluence/display/solr/Query+Syntax+and+Parsing
 
 ```javascript
-wchWrapper.doSearch({
+wchWrapper.search.query({
         query : '*:*',
         fields: 'creator, lastModified, classification',
         facetquery : ['classification:asset', 'lastModified:[2016-12-20T09:15:25.882Z TO NOW]'],
@@ -123,7 +123,7 @@ Another feature supported for extended use cases is faceting. You can use faceti
 [youractivitysample]: /samples/yourActivitySample.js
 
 ```javascript
-wchWrapper.doSearch({
+wchWrapper.search.query({
         query : '*test*',
         rows : 0,
         dismax: {
@@ -179,7 +179,7 @@ Resources are not directly visible in the authoring UI. But if you want to uploa
 Uploads a resource to WCH. Make sure to link the resource to an asset afterwards. Be aware that the binaries of a resource can't get updated here. It's only possible to update metadata of resources. For use cases requiring an update have a look at the assets section. 
 
 ```javascript
-wchWrapper.createResource({
+wchWrapper.asset.createResource({
         filePath : 'Absolute/Path/To/YourFileToUpload.jpeg',
         fileName : 'nameinwch.whateveryoulike',
         randomId : true
@@ -209,7 +209,7 @@ Deletes the specified amount of assets matching the query.
 
 ```javascript
   let deleteQry = 'name:*Calendar* AND document:*Test*';
-  wchWrapper.deleteAssets(deleteQry, 100);
+  wchWrapper.asset.deleteAssets(deleteQry, 100);
 ```
 
 - `query` - [Required] The assetquery used to select the assets to get deleted. Can also be an array of multiple facetqueries.
@@ -227,7 +227,7 @@ Creates a new asset definition. If you set the path attribute the asset will be 
     name: 'NameOfTheAsset',
     resource: 'ID to an existing resource'
   };
-  wchWrapper.createAsset(assetDef);
+  wchWrapper.asset.createAsset(assetDef);
 ```
 
 - `assetDef` - [Required] Valid WCH definition of an asset.
@@ -253,7 +253,7 @@ Updates an existing asset definition.
     name: 'NameOfTheAsset',
     resource: 'ID to an existing resource'
   };
-  wchWrapper.updateAsset(assetDef);
+  wchWrapper.asset.updateAsset(assetDef);
 ```
 
 - `assetDef` - [Required] Valid WCH definition of an asset.
@@ -285,7 +285,7 @@ Convenience method which uploads and creates a resource and afterwards an asset 
           categoryIds:["IDOFACATEGORY"]
         } 
   }
-  wchWrapper.uploadAsset(asset);
+  wchWrapper.asset.uploadAsset(asset);
 ```
 
 - `options` - [Required] Valid WCH definition of an asset.
@@ -337,7 +337,7 @@ Query method to get the tree of sub categories based on a starting category. A g
 The taxonomy API is based around the simple category API endpoint. This allows you to create standalone categories based on the following definition:
 
 ```javascript
-wchWrapper.createCategory({
+wchWrapper.taxonomy.createCategory({
   name: "NAMEOFTHECATEGORY",
   parent: "PARENTCATEGORY"
 });
@@ -374,7 +374,7 @@ Taxonomy Definition:
 Connector Call:
 ```javascript
 let taxonomyDef = ... // Load the taxonomy definition
-wchWrapper.createTaxonomies(taxonomyDef);
+wchWrapper.taxonomy.createTaxonomies(taxonomyDef);
 ```
 
 - `name` - [Required] If you want to create the first level of a taxonomy including its name.
@@ -402,7 +402,7 @@ Convienience method which creates valid delivery urls to resources based on a se
 [resourcedeliverysample]: /samples/resourceDeliveryUrlSample.js
 
 ```javascript
-wchWrapper.getResourceDeliveryUrls({
+wchWrapper.search.getResourceDeliveryUrls({
   urlType: 'akami',
   queryParams: {
     facetquery: 'name:*TypeTest*',
