@@ -15,7 +15,6 @@ const env = require('../.env');
 const wchconfig = {
         endpoint: 'authoring',
         baseUrl: env.credentials.baseurl, // Required! The API Url found on the authoring UI
-        tenantid: env.credentials.tenantid, // Replace with your tenant
         credentials: {
           usrname: env.credentials.usrname, // Replace with your blueid
           pwd: env.credentials.pwd // Replace with your password
@@ -27,5 +26,10 @@ const wchConnector = require('../index')(wchconfig);
 // In your case this changes to:
 // const wchConnector = require('sample-wch-node-connector')(wchconfig);
 
-wchConnector.asset.deleteAssets('isManaged:true AND name:*start*', 2).
-then(console.log);
+const maxDelAmount = 100; // default
+
+wchConnector.content.deleteContentItems('*:*', maxDelAmount).
+then(() => wchConnector.content.deleteContentTypes('*:*', maxDelAmount)).
+then(() => wchConnector.asset.deleteAssets('*:*', maxDelAmount)).
+then(() => wchConnector.taxonomy.deleteTaxonomies('*:*', maxDelAmount)).
+then(() => console.log('Cleaned up!'));

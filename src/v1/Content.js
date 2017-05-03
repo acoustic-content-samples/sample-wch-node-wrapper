@@ -25,7 +25,7 @@ class Content {
      */
     createContentType(typeDefinition) {
         return this.connector.loginstatus.
-        then((base) => Object.assign({},
+        then(base => Object.assign({},
             this.connector.options,
             {
                 baseUrl: base,
@@ -47,7 +47,7 @@ class Content {
      */
     updateContentType(typeDefinition) {
         return this.connector.loginstatus.
-        then((base) => Object.assign({},
+        then(base => Object.assign({},
             this.connector.options,
             {
                 baseUrl: base,
@@ -67,7 +67,7 @@ class Content {
     bulkDeleteItems(contentItemIds) {
       if(!contentItemIds || contentItemIds.length === 0) return Promise.resolve('No Id');
       return this.connector.loginstatus.
-        then((base) => Object.assign({},
+        then(base => Object.assign({},
           this.connector.options, 
           { baseUrl: base,
             uri: `${this.connector.endpoint.uri_content}`,
@@ -77,7 +77,7 @@ class Content {
             }
           })
         ).
-        then(options => send(options, this.connector.retryHandler)).
+        then(options => this.connector.send(options, this.connector.retryHandler)).
         catch(this.connector.errLogger);
     }
 
@@ -95,6 +95,52 @@ class Content {
               then(data => (data.documents) ? data.documents : []).
               then(documents => documents.map(document => (document.id.startsWith('content:')) ? document.id.substring('content:'.length) : document.id)).
               then(this.bulkDeleteItems);
+    }
+
+    /**
+     * Deletes a single content type based on its ID.
+     * @param  {String} typeid - The content type id.
+     * @return {Promise} With the result of the delete operation
+     */
+    deleteTypes(typeid) {
+      if(!typeid) return Promise.resolve('No Id');
+      return this.connector.loginstatus.
+        then(base => Object.assign({},
+          this.connector.options, 
+          { baseUrl: base,
+            uri: `${this.connector.endpoint.uri_types}/${typeid}`,
+            method: 'DELETE'
+          })
+        ).
+        then(options => this.connector.send(options, this.connector.retryHandler)).
+        catch(this.connector.errLogger);
+    }
+
+    /**
+     * Deletes all content types based on the ids passed in. At the moment this feature is not available in WCH yet. 
+     * Therefore we will call a delte for each ID separately.
+     * @param  {Array} contentTypeIds - String array with all content-type ids that should get deleted.
+     * @return {Promse} - Resolves when the deletion process has finished.
+     */
+    bulkDeleteTypes(contentItemIds) {
+      if(!contentItemIds || contentItemIds.length === 0) return Promise.resolve('No Ids');
+      return resolveall(contentItemIds.map(contentId => this.deleteTypes(contentId)));
+    }
+
+    /**
+     * Convenience method to bulk delete items based on a search query result.
+     * @param  {String} query - A facet query term to specify which content items should get deleted.
+     * @param  {Integer} rows - The maximum amount of elements which should get deleted.
+     * @return {Promse} Resolves when the bulk delete step has finished.
+     */
+    deleteContentTypes(query, rows) {
+      let amtEle = rows || 500;
+      let qryParams = {query: `classification:content-type`, facetquery: query, fields:'id', rows: amtEle};
+
+      return this.connector.search.query(qryParams).
+              then(data => (data.documents) ? data.documents : []).
+              then(documents => documents.map(document => (document.id.startsWith('content-type:')) ? document.id.substring('content-type:'.length) : document.id)).
+              then(ids => this.bulkDeleteTypes(ids));
     }
 
 }

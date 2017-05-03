@@ -1,5 +1,5 @@
 /*
- * Copyright 2016  IBM Corp.
+ * Copyright 2017  IBM Corp.
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0 
@@ -14,8 +14,9 @@
 const env = require('../.env');
 const wchconfig = {
         endpoint: 'delivery',
-        baseUrl: env.credentials.baseurl // The API Url
+        baseUrl: env.credentials.baseurl // Required! The API Url found on the authoring UI
       };
+
 // Since I'm in the sample directly I directly require the entry point...
 const wchConnector = require('../src/index')(wchconfig);
 // In your case this changes to:
