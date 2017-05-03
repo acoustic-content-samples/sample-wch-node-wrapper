@@ -51,7 +51,7 @@ class Content {
             this.connector.options,
             {
                 baseUrl: base,
-                uri: this.connector.endpoint.uri_types+'/'+encodeURIComponent(typeDefinition.id),
+                uri: `${this.connector.endpoint.uri_types}/${encodeURIComponent(typeDefinition.id)}`,
                 method: 'PUT',
                 body: typeDefinition
             })
@@ -108,7 +108,7 @@ class Content {
         then(base => Object.assign({},
           this.connector.options, 
           { baseUrl: base,
-            uri: `${this.connector.endpoint.uri_types}/${typeid}`,
+            uri: `${this.connector.endpoint.uri_types}/${encodeURIComponent(typeid)}`,
             method: 'DELETE'
           })
         ).

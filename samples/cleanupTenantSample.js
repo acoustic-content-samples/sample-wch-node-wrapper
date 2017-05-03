@@ -9,6 +9,10 @@
  */
 'use strict'
 
+///////////////////
+// WARNING: Executing this command cleans up all your content and assets from your tentant! This cannot be undone!
+///////////////////
+
 // I've placed my credentials in a separate .env file. You can remove this line and
 // add your credentials directly to the wchconfig variable down below. 
 const env = require('../.env');
