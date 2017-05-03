@@ -26,5 +26,5 @@ const wchConnector = require('../index')(wchconfig);
 // In your case this changes to:
 // const wchConnector = require('sample-wch-node-connector')(wchconfig);
 
-wchConnector.content.deleteContentItems('*:*').
+wchConnector.content.deleteContentItems('name:mycool*').
 then(console.log);

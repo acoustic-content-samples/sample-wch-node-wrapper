@@ -14,12 +14,11 @@
 const env = require('../.env');
 const wchconfig = {
         endpoint: 'authoring',
-        tenantid: env.credentials.tenantid, // Replace with your tenant
+        baseUrl: env.credentials.baseurl, // Required! The API Url found on the authoring UI
         credentials: {
           usrname: env.credentials.usrname, // Replace with your blueid
           pwd: env.credentials.pwd // Replace with your password
-        },
-        debug: true
+        }
       };
 
 // Since I'm in the sample directly I directly requre the entry point...
@@ -27,5 +26,5 @@ const wchConnector = require('../index')(wchconfig);
 // In your case this changes to:
 // const wchConnector = require('sample-wch-node-connector')(wchconfig);
 
-wchConnector.content.deleteContentTypes('name:sample*').
+wchConnector.content.deleteContentTypes('name:mycool*').
 then(console.log);

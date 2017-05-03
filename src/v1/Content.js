@@ -89,12 +89,11 @@ class Content {
      */
     deleteContentItems(query, rows) {
       let amtEle = rows || 500;
-      let qryParams = {query: `classification:content`, facetquery: query, fields:'id', rows: amtEle};
-
+      let qryParams = { query: 'classification:content', facetquery: query, fields:'id', rows: amtEle};
       return this.connector.search.query(qryParams).
               then(data => (data.documents) ? data.documents : []).
               then(documents => documents.map(document => (document.id.startsWith('content:')) ? document.id.substring('content:'.length) : document.id)).
-              then(this.bulkDeleteItems);
+              then(items => this.bulkDeleteItems(items));
     }
 
     /**

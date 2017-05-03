@@ -20,7 +20,6 @@ const wchconfig = {
           usrname: env.credentials.usrname, // Replace with your blueid
           pwd: env.credentials.pwd // Replace with your password
         }
-        ,debug:true
       };
 
 // Since I'm in the sample directly I directly requre the entry point...
