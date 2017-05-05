@@ -195,7 +195,7 @@ class Taxonomy {
                   let {name, id} = child;
                   let currChild = currCategoryLvl.children.find((element) => element.id && element.id===id);
                   if(!currChild) {
-                    openCalls.push(this.createCategory({name, id, parent: parentid}).
+                    openCalls.push(this.createCategory({name, parent: parentid}).
                     then(result => {newCategoryLvl.children[indx].id = result.id;}));
                   } else if(name !== currChild.name) {
                      openCalls.push(this.updateCategory({name, id, parent: parentid}));
