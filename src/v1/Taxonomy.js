@@ -135,10 +135,12 @@ class Taxonomy {
     /* Convinience method to create taxonomies. Since taxonomies are reliying on a 'strict' parent child relation ship. We have to ensure
     that the parent category was created before the child categories. */
     createCategoryLvl(taxonomyLvl, categoryMap) {
+        let _getname = (obj) => (typeof obj === 'string') ? obj : obj.name;
         return new Promise((resolve, reject) => {
           Promise.resolve(taxonomyLvl.childs).
-          then(childs => resolveall(childs.map(child => this.createCategory({name:child, parent: categoryMap.get(taxonomyLvl.parent)})))).
-          then(categories => resolveall(categories.map(result => categoryMap.set(result.name, result.id)))).
+          then(childs => childs.map(child => this.createCategory({name:_getname(child), parent: categoryMap.get(_getname(taxonomyLvl.parent))}))).
+          then(createPromises => resolveall(createPromises)).
+          then(categories => categories.map(result => categoryMap.set(result.name, result.id))).
           then(resolve).
           catch(reject);
         });
