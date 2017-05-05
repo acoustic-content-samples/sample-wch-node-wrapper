@@ -22,7 +22,7 @@ class Taxonomy {
      * searchresult.
      * @param  {String}  categoryId - UUID of the category to search for
      * @param  {Object}  config - Config on what to retrieve.
-     * @param  {Boolean} config.recurse - If true it will also include children of children, if false only direct childs are returned
+     * @param  {Boolean} config.recurse - If true it will also include children of children, if false only direct children are returned
      * @param  {Number}  config.limit - How many items are returned max.
      * @param  {Number}  config.offset - Where to start returning. Useful for pagination.
      * @param  {Boolean} config.simple - When simple is set to true the result is transformed into a simple view. Otherwise the original answer for WCH is returned. Defaults to false.
@@ -137,8 +137,8 @@ class Taxonomy {
     createCategoryLvl(taxonomyLvl, categoryMap) {
         let _getname = (obj) => (typeof obj === 'string') ? obj : obj.name;
         return new Promise((resolve, reject) => {
-          Promise.resolve(taxonomyLvl.childs).
-          then(childs => childs.map(child => this.createCategory({name:_getname(child), parent: categoryMap.get(_getname(taxonomyLvl.parent))}))).
+          Promise.resolve(taxonomyLvl.children).
+          then(children => children.map(child => this.createCategory({name:_getname(child), parent: categoryMap.get(_getname(taxonomyLvl.parent))}))).
           then(createPromises => resolveall(createPromises)).
           then(categories => categories.map(result => categoryMap.set(result.name, result.id))).
           then(resolve).
@@ -153,7 +153,7 @@ class Taxonomy {
      * @param  {Object} taxonomyLvl - Represents either the root of a taxonomy or a level inisde a taxonomy. Stored inside the taxonomyDefinition.
      * @param  {String} name  - Indicates the start/name of a taxonomy. If name is present the parent attribute will be ignored.
      * @param  {String} parent - Reference to the parent category. Will internally mapped to the category ID.
-     * @param  {Array} childs - String Array containing the names of the categories on this level.
+     * @param  {Array} children - String Array containing the names of the categories on this level.
      * @return {Promise} - Resolves when the taxonomy is completly created.
      */
     createTaxonomies(taxonomyDefinition) {
@@ -167,6 +167,7 @@ class Taxonomy {
           then(() => taxonomyDefinition[key].reduce((p, taxonomyLvl) => p.then(() => this.createCategoryLvl(taxonomyLvl, taxonomiesMap[key])), Promise.resolve()));
         }));
       }).
+      catch(this.connector.errorLogger).
       then(() => taxonomiesMap);
     }
 
@@ -180,33 +181,60 @@ class Taxonomy {
     updateTaxonomies(newTaxonomyDefinitions) {
       let taxonomies = Object.keys(newTaxonomyDefinitions);
       let taxQuery = `name:${taxonomies.join(' OR name:')}`;
-      return this.getTaxonomy({facetquery: taxQuery}, {simple:true}).
+      return this.getTaxonomies({facetquery: taxQuery}, {simple:true}).
         then(currentTaxonomies => {
           return new Promise((resolve, reject) => {
-            let openCalls = [];
-            taxonomies.forEach(key => {
-              let currentTax = currentTaxonomies[key];
-              let newTax = newTaxonomyDefinitions[key];
-              newTax.forEach(newCategoryLvl => {
-                let {id : parentid , name :parentname } = newCategoryLvl.parent;
-                let currCategoryLvl = currentTax.find((element) => element.parent.id && element.parent.id===parentid);
+            let openTaxonomies = taxonomies.map(key => {
+              return new Promise((resolve, reject) => {
+                let newIdMap = new Map();
+                let currentTax = currentTaxonomies[key];
+                let newTax = newTaxonomyDefinitions[key];
 
-                newCategoryLvl.children.forEach((child, indx) => {
-                  let {name, id} = child;
-                  let currChild = currCategoryLvl.children.find((element) => element.id && element.id===id);
-                  if(!currChild) {
-                    openCalls.push(this.createCategory({name, parent: parentid}).
-                    then(result => {newCategoryLvl.children[indx].id = result.id;}));
-                  } else if(name !== currChild.name) {
-                     openCalls.push(this.updateCategory({name, id, parent: parentid}));
-                  }
-                });
+                let openCatlevels = newTax.reduce((p, newCategoryLvl) => {
+                  return p.then(() => {return new Promise((resolve, reject) => {
+                      if (!newCategoryLvl.children) resolve();
+                      let {id : parentid , name :parentname } = newCategoryLvl.parent;
+                      if(!parentid || parentid === null) {
+                        parentid=newIdMap.get(parentname);
+                        newCategoryLvl.parent.id=parentid;
+                      }
+                      let currCategoryLvl = currentTax.find((element) => element.parent.id && element.parent.id===parentid);
+                      let openChilds = newCategoryLvl.children.map((child, indx) => {
+                        return new Promise((resolve, reject) => {
+                          let {name, id} = child;
+                          let currChild = (currCategoryLvl) ? currCategoryLvl.children.find((element) => element.id && element.id===id):undefined;
+                          if(!currChild) {
+                            this.createCategory({name, parent: parentid}).
+                            then(result => {newCategoryLvl.children[indx].id = result.id; newIdMap.set(result.name, result.id)}).
+                            then(resolve);
+                          } else if(name !== currChild.name) {
+                            this.updateCategory({name, id, parent: parentid}).
+                            then(resolve);
+                          } else {
+                            resolve();
+                          }
+                        });
+                      });
+                      
+                      resolveall(openChilds).
+                      catch(reject).
+                      then(resolve);
 
+                    });
+                  });
+                }, Promise.resolve());
+
+                openCatlevels.
+                catch(reject).
+                then(resolve);
               });
             });
-            Promise.all(openCalls).
+
+            resolveall(openTaxonomies).
+            catch(reject).
             then(() => resolve(newTaxonomyDefinitions));
-          });
+          }).
+          catch(this.connector.errorLogger);
         });
     }
 
@@ -222,7 +250,8 @@ class Taxonomy {
         return this.connector.search.query(qryParams).
         then(data => (data.documents) ? data.documents : []).
         then(documents => documents.map(document => (document.id.startsWith('taxonomy:')) ? document.id.substring('taxonomy:'.length) : document.id)).
-        then(ids => resolveall(ids.map(id => this.deleteCategory(id))));
+        then(ids => resolveall(ids.map(id => this.deleteCategory(id)))).
+        catch(this.connector.errorLogger);
     }
 
     /**
@@ -235,7 +264,8 @@ class Taxonomy {
         then(data => (data.documents) ? data.documents : []).
         then(documents => documents.map(document => (document.id.startsWith('taxonomy:')) ? document.id.substring('taxonomy:'.length) : document.id)).
         then(idset => resolveall(idset.map(taxid => this.getCategoryTree(taxid, taxconfig)))).
-        then(resultset => resultset.reduce((result, taxonomy) => Object.assign(result, taxonomy), {}));
+        then(resultset => resultset.reduce((result, taxonomy) => Object.assign(result, taxonomy), {})).
+        catch(this.connector.errorLogger);
     }
 
 }
