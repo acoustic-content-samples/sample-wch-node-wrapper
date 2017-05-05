@@ -18,19 +18,6 @@ class Taxonomy {
     }
 
     /**
-     * Returns all matchin taxonomies by searchquery.
-     * @param  {Object} query - A valid searchquery object. See search#query for details.
-     * @return {Promise} Resolves with a complete taxonomy tree.
-     */
-    getTaxonomy(query, taxconfig) {
-      return this.connector.search.taxonomies(query).
-        then(data => (data.documents) ? data.documents : []).
-        then(documents => documents.map(document => (document.id.startsWith('taxonomy:')) ? document.id.substring('taxonomy:'.length) : document.id)).
-        then(idset => resolveall(idset.map(taxid => this.getCategoryTree(taxid, taxconfig)))).
-        then(resultset => resultset.reduce((result, taxonomy) => Object.assign(result, taxonomy), {}));
-    }
-
-    /**
      * Returns a list of all child categories based on the given ID. The given ID is not included in the
      * searchresult.
      * @param  {String}  categoryId - UUID of the category to search for
@@ -181,12 +168,14 @@ class Taxonomy {
       then(() => taxonomiesMap);
     }
 
+    /**
+     * Updates an exisiting taxonomy based on a simple taxonomy format used in this sample. A good starting point 
+     * is to use the getTaxonomies method (in simple mode) and do your changes based on the result.
+     * 
+     * @param  {Object} newTaxonomyDefinitions - An object with at least one taxonomy definition.
+     * @return {Promise} - Returns the updated taxonomy definition with all potential new ids for new categories.
+     */
     updateTaxonomies(newTaxonomyDefinitions) {
-      let updateCategoryLvl = (taxLevel) => {
-
-        // taxLevel.children
-      };
-
       let taxonomies = Object.keys(newTaxonomyDefinitions);
       let taxQuery = `name:${taxonomies.join(' OR name:')}`;
       return this.getTaxonomy({facetquery: taxQuery}, {simple:true}).
@@ -232,6 +221,19 @@ class Taxonomy {
         then(data => (data.documents) ? data.documents : []).
         then(documents => documents.map(document => (document.id.startsWith('taxonomy:')) ? document.id.substring('taxonomy:'.length) : document.id)).
         then(ids => resolveall(ids.map(id => this.deleteCategory(id))));
+    }
+
+    /**
+     * Returns all matching taxonomies based by a regular searchquery.
+     * @param  {Object} query - A valid searchquery object. See search#query for details.
+     * @return {Promise} Resolves with a complete taxonomy tree.
+     */
+    getTaxonomies(query, taxconfig) {
+      return this.connector.search.taxonomies(query).
+        then(data => (data.documents) ? data.documents : []).
+        then(documents => documents.map(document => (document.id.startsWith('taxonomy:')) ? document.id.substring('taxonomy:'.length) : document.id)).
+        then(idset => resolveall(idset.map(taxid => this.getCategoryTree(taxid, taxconfig)))).
+        then(resultset => resultset.reduce((result, taxonomy) => Object.assign(result, taxonomy), {}));
     }
 
 }

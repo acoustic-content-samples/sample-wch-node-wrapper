@@ -47,6 +47,6 @@ function writeFile(objTax) {
   });
 }
 
-wchConnector.taxonomy.getTaxonomy({facetquery: 'name:mycool*'}, {simple:true}).
+wchConnector.taxonomy.getTaxonomies({facetquery: 'name:mycool*'}, {simple:true}).
 then(objTax => writeFile(objTax)).
 then(objTax => console.log(JSON.stringify(objTax, null, 1)));

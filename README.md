@@ -14,8 +14,9 @@ npm i -S git+ssh://git@github.com:ibm-wch/sample-wch-node-wrapper.git`.
 In order to use the connector in your node application you have to initalize the connector first:
 ```node
 const wchWrapper = require('sample-wch-node-wrapper')({
-        tenantid: 'YOUR TENANT ID',
+        tenantid: 'YOUR WCH ID',
         endpoint: 'authoring',
+        baseUrl: 'YOUR TENANT API PATH',
         credentials: {
           usrname: 'YOUR BLUEID USER',
           pwd: 'YOUR BLUEID PASSWORD'
@@ -23,7 +24,7 @@ const wchWrapper = require('sample-wch-node-wrapper')({
         maxSockets: 10
       });
 ```
-- `baseUrl` - [Optional] The base URL for the WCH API calls in anonymous use cases. Be aware that after a succesful login the base URL might change based on the login response. For details have a look at the login section. Defaults to https://my.digitalexperience.ibm.com/api.
+- `baseUrl` - [Required] The base URL for the WCH API calls in anonymous use cases. Be aware that after a succesful login the base URL might change based on the login response. For details have a look at the login section. Defaults to https://my.digitalexperience.ibm.com/api.
 - `tenantid` - [Optional] The tenantid of your WCH account. You find the tenantid in the authoring UI after login. Simply click on the info button you'll find on the top left.
 - `endpoint` - [Optional] Choose the api endpoint. The connector either interacts with content in the authoring environment ('authoring') or with delivered content ready for production use cases ('delivery'). Default is 'delivery'.
 - `credentials` - [Optional] Used to authenticate towards content hub. You always have to pass in your credential when choosing the authoring endpoint. Per Default you get anonymous access to the delivery endpoint.
@@ -64,7 +65,7 @@ When providing the connector with your credentials this method is called automat
 The GET path is based around basic authentication. Make sure to encode your username and password in the authorization header.
 
 ```http
-GET https://my.digitalexperience.ibm.com/api/login/v1/basicauth
+GET https://my[0-9][0-9].digitalexperience.ibm.com/api/<tenantid>/login/v1/basicauth
 Headers:
   Authorization: Basic Base64[USERNAME:PASSWORD]
 ```
@@ -74,7 +75,7 @@ Headers:
 The POST path requires no headers but instead you send your credentials in the body which has to be application/x-www-form-urlencoded. This approach could be a nice fit for form based logins.
 
 ```http
-POST https://my.digitalexperience.ibm.com/api/login/v1/basicauth
+POST https://my[0-9][0-9].digitalexperience.ibm.com/api/<tenantid>/login/v1/basicauth
 Headers:
   Content-Type: application/x-www-form-urlencoded
 Body:
@@ -331,6 +332,7 @@ Query method to get the tree of sub categories based on a starting category. A g
 - `config.recurse` - [Optional] If true it will also include children of children, if false only direct childs are returned. Defaults to true.
 - `config.limit` - [Optional] How many children are maximal returned. Default is *100*.
 - `config.offset` - [Optional] Where to start returning the children. Useful to return subtrees. Defaults to 0.
+- `config.simple` - [Optional] When this param is set to true the method returns simple taxonomy representations. These can be used as a starting point for update tasks. Otherwise the method will return the full response from Watson Content Hub. Defaults to false.
 
 > `createCategory(categoryDef)`
 
@@ -351,24 +353,24 @@ Creating a complete taxonomy is based on a simple json definition file. The defi
 
 Taxonomy Definition:
 ```json
-[ 
-  {
-    "name" : "mycooltesttax",
+{ 
+  mycooltesttax: {
+    "parent" : "mycooltesttax", // This will be the first level
     "childs": ["mycoolcat1", "mycoolcat2", "mycoolcat3"]
   },
   {
-    "parent": "mycoolcat1",
+    "parent": "mycoolcat1", // This will be a second level
     "childs": ["mycoolsubcat1"]
   },
   {
-    "parent": "mycoolcat3",
-    "childs": ["mycoolsubcat1"]
+    "parent": "mycoolcat3", // This will be a second level
+    "childs": ["mycoolsubcat3"]
   },
   {
-    "parent": "mycoolsubcat1",
+    "parent": "mycoolsubcat1", // And this is a third level
     "childs": ["mycoolsubsubcat1", "mycoolsubsubcat2"]
   }
-]
+}
 ```
 
 Connector Call:
