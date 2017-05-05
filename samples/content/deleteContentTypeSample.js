@@ -11,7 +11,7 @@
 
 // I've placed my credentials in a separate .env file. You can remove this line and
 // add your credentials directly to the wchconfig variable down below. 
-const env = require('../.env');
+const env = require('../../.env');
 const wchconfig = {
         endpoint: 'authoring',
         baseUrl: env.credentials.baseurl, // Required! The API Url found on the authoring UI
@@ -22,7 +22,7 @@ const wchconfig = {
       };
 
 // Since I'm in the sample directly I directly requre the entry point...
-const wchConnector = require('../index')(wchconfig); 
+const wchConnector = require('../../index')(wchconfig); 
 // In your case this changes to:
 // const wchConnector = require('sample-wch-node-connector')(wchconfig);
 

@@ -11,7 +11,8 @@
 
 // I've placed my credentials in a separate .env file. You can remove this line and
 // add your credentials directly to the wchconfig variable down below. 
-const env = require('../.env');
+const path = require('path');
+const env = require('../../.env');
 const wchconfig = {
         endpoint: 'authoring',
         baseUrl: env.credentials.baseurl, // Required! The API Url found on the authoring UI
@@ -22,9 +23,22 @@ const wchconfig = {
       };
 
 // Since I'm in the sample directly I directly requre the entry point...
-const wchConnector = require('../index')(wchconfig); 
+const wchConnector = require('../../index')(wchconfig); 
 // In your case this changes to:
 // const wchConnector = require('sample-wch-node-connector')(wchconfig);
 
-wchConnector.taxonomy.getTaxonomy({facetquery: 'name:mycool*'}).
-then(objTax => console.log(JSON.stringify(objTax, null, 1)));
+let asset = {
+  resourceDef: {
+    filePath : path.resolve(__dirname, 'uploadAssetSampleOutput.PNG'),
+    fileName : 'uploadsample.jpg',
+    randomId : true
+  },
+  assetDef : {
+    tags: {"values":['test', 'upload'],"declined":[], "analysis":"none"},
+    description: 'This is kind of a test upload my dear',
+    name: 'Upload Asset Sample'
+  }
+}
+
+wchConnector.asset.upload(asset).
+then(console.log);

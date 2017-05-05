@@ -9,9 +9,16 @@
  */
 'use strict'
 
+///////////////////
+// Note: The sample is configured to return the taxonomy which was created by the createTaxonomiesSample.js. 
+// Either run that sample first or adapt the search query to find an existing taxonomy in your tenant. 
+///////////////////
+
+const fs = require('fs');
+const path = require('path');
 // I've placed my credentials in a separate .env file. You can remove this line and
 // add your credentials directly to the wchconfig variable down below. 
-const env = require('../.env');
+const env = require('../../.env');
 const wchconfig = {
         endpoint: 'authoring',
         baseUrl: env.credentials.baseurl, // Required! The API Url found on the authoring UI
@@ -22,9 +29,24 @@ const wchconfig = {
       };
 
 // Since I'm in the sample directly I directly requre the entry point...
-const wchConnector = require('../index')(wchconfig); 
+const wchConnector = require('../../index')(wchconfig); 
 // In your case this changes to:
 // const wchConnector = require('sample-wch-node-connector')(wchconfig);
 
-wchConnector.content.deleteContentItems('name:mycool*').
-then(console.log);
+function writeFile(objTax) {
+  return new Promise((res, rej) => {
+    fs.writeFile(path.join(__dirname, "getTaxonomiesSampleResult.json"), JSON.stringify(objTax, null, 1), 
+    (err) => {
+      if (err) {
+          console.error(err);
+          rej(err);
+      };
+      console.log("File has been created");
+      res(objTax[0]);
+    });
+  });
+}
+
+wchConnector.taxonomy.getTaxonomy({facetquery: 'name:mycool*'}, {simple:true}).
+then(objTax => writeFile(objTax)).
+then(objTax => console.log(JSON.stringify(objTax, null, 1)));
