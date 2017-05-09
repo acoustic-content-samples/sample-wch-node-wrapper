@@ -201,13 +201,22 @@ class Taxonomy {
                       let currCategoryLvl = currentTax.find((element) => element.parent.id && element.parent.id===parentid);
                       let openChilds = newCategoryLvl.children.map((child, indx) => {
                         return new Promise((resolve, reject) => {
+
                           let {name, id} = child;
-                          let currChild = (currCategoryLvl) ? currCategoryLvl.children.find((element) => element.id && element.id===id):undefined;
-                          if(!currChild) {
+
+                          let currChildId = (currCategoryLvl) ? currCategoryLvl.children.find((element) => element.id && element.id===id):undefined;
+                          let currChildName = (currCategoryLvl) ? currCategoryLvl.children.find((element) => element.name && element.name===name):undefined;
+
+                          if(!currChildId && currChildName) {
+                            let currChildName = (currCategoryLvl) ? currCategoryLvl.children.find((element) => element.name && element.name===name):undefined;
+                            newCategoryLvl.children[indx].id = currChildName.id; 
+                            newIdMap.set(currChildName.name, currChildName.id);
+                            resolve();
+                          } else if(!currChildId && !currChildName) {
                             this.createCategory({name, parent: parentid}).
                             then(result => {newCategoryLvl.children[indx].id = result.id; newIdMap.set(result.name, result.id)}).
                             then(resolve);
-                          } else if(name !== currChild.name) {
+                          } else if(name !== currChildId.name) {
                             this.updateCategory({name, id, parent: parentid}).
                             then(resolve);
                           } else {
