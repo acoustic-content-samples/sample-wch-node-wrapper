@@ -97,13 +97,13 @@ class Search{
         let _facetRangeGap = _facetRange.gap || undefined;
         // Spacial search specific variables
         let _spacialsearch = queryParams.spacialsearch || {};
-        let _spacialfilter = _spacialsearch.filter || 'geofilt';
-        let _spacialfilterfq = `{!${_spacialfilter}}`
-        let _spacialdistance = _spacialsearch.distance || 0;
-        let _spacialfield = _spacialsearch.field || 'locations';
+        let _spacialfilter = (_spacialsearch.position) ? _spacialsearch.filter || 'geofilt' : '';
+        let _spacialfilterfq = (_spacialsearch.position) ? `{!${_spacialfilter}}` : '';
+        let _spacialdistance = _spacialsearch.distance || undefined;
+        let _spacialfield = (_spacialsearch.position) ? _spacialsearch.field || 'locations' : undefined;
         let _distanceUnits = _spacialsearch.distanceUnits || undefined;
         let _spacialposition = _spacialsearch.position || {};
-        let _spacialsort = ('sort' in _spacialsearch) ? `geodist() ${_spacialsearch.sort}` : undefined;
+        let _spacialsort = ('sort' in _spacialsearch) ? `geodist() ${_spacialsearch.sort}` : '';
 
         // Override settings for specific fields
         let _override = queryParams.override || {};

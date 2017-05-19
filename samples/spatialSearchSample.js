@@ -13,7 +13,6 @@
 // add your credentials directly to the wchconfig variable down below. 
 const env = require('../.env');
 const wchconfig = {
-    debug: true,
         endpoint: 'delivery',
         baseUrl: env.credentials.baseurl // Required! The API Url found on the authoring UI
       };
