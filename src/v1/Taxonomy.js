@@ -194,7 +194,7 @@ class Taxonomy {
                   return p.then(() => {return new Promise((resolve, reject) => {
                       if (!newCategoryLvl.children) resolve();
                       let {id : parentid , name :parentname } = newCategoryLvl.parent;
-                      if(!parentid || parentid === null) {
+                      if(!parentid || parentid === null || newIdMap.has(parentname)) {
                         parentid=newIdMap.get(parentname);
                         newCategoryLvl.parent.id=parentid;
                       }
@@ -215,9 +215,12 @@ class Taxonomy {
                           } else if(!currChildId && !currChildName) {
                             this.createCategory({name, parent: parentid}).
                             then(result => {newCategoryLvl.children[indx].id = result.id; newIdMap.set(result.name, result.id)}).
+                            catch(reject).
                             then(resolve);
                           } else if(name !== currChildId.name) {
+                            newIdMap.set(name, id);
                             this.updateCategory({name, id, parent: parentid}).
+                            catch(reject).
                             then(resolve);
                           } else {
                             resolve();
