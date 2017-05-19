@@ -56,6 +56,15 @@ class Search{
      * @param  {Object} queryParams.facet.contains - Object containing the facet contains settings.
      * @param  {String} queryParams.facet.contains.text - Limits the terms used for faceting to those that contain the specified substring.
      * @param  {Bool}   queryParams.facet.contains.ignoreCase - If facet.contains is used, ignore case when searching for the specified substring.
+     * @param  {Object} queryParams.spatialsearch - Object containing all information required to do a spacial search
+     * @param  {Object} queryParams.spatialsearch.position - Object storing longitute and latitude of geoposition from where to search
+     * @param  {Number} queryParams.spatialsearch.position.lat - Latitute
+     * @param  {Number} queryParams.spatialsearch.position.lng - Longitute 
+     * @param  {Number} queryParams.spatialsearch.distance - Distance in kilomenters (default) to search for matching content around the position
+     * @param  {String} queryParams.spatialsearch.distanceUnit - Distance unit. Defaults to `kilometers`. Can also be set to `miles` and `degrees`
+     * @param  {String} queryParams.spatialsearch.filter - Logic for distance calulation. Defaults to `geofilter`. Can also be `bbox`.
+     * @param  {String} queryParams.spatialsearch.field - THe indexed field where the geopositiong of the content item is stored. This normally should not be changed from the default which is `locations`.
+     * @param  {String} queryParams.spatialsearch.sort - Adds a convenience sort method based on the SOLR geodist() function. You simply add 'asc' or 'desc' here.
      * @param  {Object} queryParams.override - Easy way to override settings for a specific field.
      * @return {Promise} - Resolves when the search finished.
      */
@@ -86,6 +95,16 @@ class Search{
         let _facetRangeStart = _facetRange.start || undefined;
         let _facetRangeEnd = _facetRange.end || undefined;
         let _facetRangeGap = _facetRange.gap || undefined;
+        // Spacial search specific variables
+        let _spacialsearch = queryParams.spacialsearch || {};
+        let _spacialfilter = _spacialsearch.filter || 'geofilt';
+        let _spacialfilterfq = `{!${_spacialfilter}}`
+        let _spacialdistance = _spacialsearch.distance || 0;
+        let _spacialfield = _spacialsearch.field || 'locations';
+        let _distanceUnits = _spacialsearch.distanceUnits || undefined;
+        let _spacialposition = _spacialsearch.position || {};
+        let _spacialsort = ('sort' in _spacialsearch) ? `geodist() ${_spacialsearch.sort}` : undefined;
+
         // Override settings for specific fields
         let _override = queryParams.override || {};
         let f = {};
@@ -103,9 +122,9 @@ class Search{
                 qs: Object.assign({
                     q: _query,
                     fl: _fields,
-                    fq: new Array().concat(_fq, _isManaged),
+                    fq: new Array().concat(_fq, _isManaged, _spacialfilterfq).filter(ele => (ele !== '')),
                     rows: _rows,
-                    sort: _sort,
+                    sort: [_sort, _spacialsort].filter(ele => (ele !== '')).join(','),
                     start: _start,
                     defType: _defType,
                     qf: _qf,
@@ -118,7 +137,11 @@ class Search{
                     'facet.contains.ignoreCase': _facetContainsIgnoreCase,
                     'facet.mincount': _facetMincount,
                     'facet.limit': _facetLimit,
-                    'facet.field' : _facetFields
+                    'facet.field' : _facetFields,
+                    'd': _spacialdistance,
+                    'sfield': _spacialfield,
+                    'pt': `${_spacialposition.lat},${_spacialposition.lng}`,
+                    'distanceUnits': _distanceUnits                    
                 }, f),
                 useQuerystring: true
             })).

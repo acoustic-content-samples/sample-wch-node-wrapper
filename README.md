@@ -118,10 +118,14 @@ For some search scenarios you might find the standard query parser quite cumbers
 
 Another feature supported for extended use cases is faceting. You can use faceting for example if you want to implement [typeahead support][typeaheadsample] against WCH content or if you want to give the user 'drill-down' options to refine the search. You can also use faceting for range exploration as [shown in this example][youractivitysample]. For details reference [the official documentation][Faceting].
 
+Furthermore it's possible to do spacial searches based on content items which are using the location content element. For details see [Solr Spatial Search][spatialsearch]. A sample is also [here][spatialsearchsample].
+
 [Dismax]: https://cwiki.apache.org/confluence/display/solr/The+DisMax+Query+Parser
 [Faceting]: https://cwiki.apache.org/confluence/display/solr/Faceting
+[spatialsearch]:https://cwiki.apache.org/confluence/display/solr/Spatial+Search
 [typeaheadsample]: /samples/typeaheadSample.js
 [youractivitysample]: /samples/yourActivitySample.js
+[spatialsearchsample]:/samples/spatialSearchSample.js
 
 ```javascript
 wchWrapper.search.query({
@@ -146,6 +150,14 @@ wchWrapper.search.query({
             ignoreCase: true
           }
         },
+        spacialsearch: {
+          position: {lat:48.6662305,lng:9.039273}, // IBM Lab in Böblingen :)
+          distance: 1,
+          field: 'locations', 
+          distanceUnits: 'kilometers',
+          filter: 'bbox', 
+          sort: 'desc'
+        },
         override: {
           'created.facet.mincount': 0, 
           'lastModified.facet.mincount': 0
@@ -167,6 +179,15 @@ wchWrapper.search.query({
 - `queryParams.facet.contains` - [Optional] Object containing the facet contains settings.
 - `queryParams.facet.contains.text` - [Optional] Limits the terms used for faceting to those that contain the specified substring.
 - `queryParams.facet.contains.ignoreCase` - [Optional] If facet.contains is used, ignore case when searching for the specified substring.
+- `queryParams.spatialsearch` - [Optional] Object containing all information required to do a spacial search
+- `queryParams.spatialsearch.position` - [Required] Object storing longitute and latitude of geoposition from where to search
+- `queryParams.spatialsearch.position.lat` - [Required] Latitute
+- `queryParams.spatialsearch.position.lng` - [Required] Longitute 
+- `queryParams.spatialsearch.distance` - [Optional] Distance in kilomenters (default) to search for matching content around the position
+- `queryParams.spatialsearch.distanceUnit` - [Optional] Distance unit. Defaults to `kilometers`. Can also be set to `miles` and `degrees`
+- `queryParams.spatialsearch.filter` - [Optional] Logic for distance calulation. Defaults to `geofilter`. Can also be `bbox`.
+- `queryParams.spatialsearch.field` - [Optional] The indexed field where the geopositiong of the content item is stored. This normally should not be changed from the default which is `locations`.
+- `queryParams.spatialsearch.sort - [Optional] Adds a convenience sort method based on the SOLR geodist() function. You simply add 'asc' or 'desc' here
 - `queryParams.override` - [Optional] Easy way to override settings for a specific field.
 
 ---
