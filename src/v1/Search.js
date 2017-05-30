@@ -19,7 +19,7 @@ const wchEndpoints = require('../util/wchConnectionEndpoints');
  * @return {String} - The same string with all special solr chars escaped with '\'
  */
 function escapeSolrChars(str) {
-    const solrChars = /(\+|\-|\!|\(|\)|\{|\}|\[|\]|\^|\"|\~|\*|\?|\:|\/|\&{2}|\|{2}|\s)/gm;
+    let solrChars = /(\+|\-|\!|\(|\)|\{|\}|\[|\]|\^|\"|\~|\*|\?|\:|\/|\&{2}|\|{2}|\s)/gm;
     return str.replace(solrChars, (match) => match.replace(/(.)/gm, '\\$1') );
 }
 
@@ -69,6 +69,7 @@ class Search{
      * @return {Promise} - Resolves when the search finished.
      */
     query(queryParams) {
+        //  TODO Transform to es6 variable deconstructing
         // General standard query variables
         let _query = queryParams.query || '*:*';
         let _fields = queryParams.fields || '*';
@@ -115,37 +116,37 @@ class Search{
         let _isManaged = ('isManaged' in queryParams) ? `isManaged:("${queryParams.isManaged}")` : '';
 
         return this.connector.loginstatus.
-          then((base) => Object.assign({},
-            this.connector.options,
-            {
-                baseUrl: base,
-                qs: Object.assign({
-                    q: _query,
-                    fl: _fields,
-                    fq: new Array().concat(_fq, _isManaged, _spacialfilterfq).filter(ele => (ele !== '')),
-                    rows: _rows,
-                    sort: [_sort, _spacialsort].filter(ele => (ele !== '')).join(','),
-                    start: _start,
-                    defType: _defType,
-                    qf: _qf,
-                    facet: _useFacets,
-                    'facet.range': _facetRangeFields,
-                    'facet.range.start': _facetRangeStart,
-                    'facet.range.end': _facetRangeEnd,
-                    'facet.range.gap': _facetRangeGap,
-                    'facet.contains': _facetContainsText,
-                    'facet.contains.ignoreCase': _facetContainsIgnoreCase,
-                    'facet.mincount': _facetMincount,
-                    'facet.limit': _facetLimit,
-                    'facet.field' : _facetFields,
-                    'd': _spacialdistance,
-                    'sfield': _spacialfield,
-                    'pt': `${_spacialposition.lat},${_spacialposition.lng}`,
-                    'distanceUnits': _distanceUnits                    
-                }, f),
-                useQuerystring: true
-            })).
-        then(options => this.connector.send(options, this.connector.retryHandler));
+                then((base) => (
+                  {
+                    baseUrl: base,
+                    qs: Object.assign({
+                        q: _query,
+                        fl: _fields,
+                        fq: new Array().concat(_fq, _isManaged, _spacialfilterfq).filter(ele => (ele !== '')),
+                        rows: _rows,
+                        sort: [_sort, _spacialsort].filter(ele => (ele !== '')).join(','),
+                        start: _start,
+                        defType: _defType,
+                        qf: _qf,
+                        facet: _useFacets,
+                        'facet.range': _facetRangeFields,
+                        'facet.range.start': _facetRangeStart,
+                        'facet.range.end': _facetRangeEnd,
+                        'facet.range.gap': _facetRangeGap,
+                        'facet.contains': _facetContainsText,
+                        'facet.contains.ignoreCase': _facetContainsIgnoreCase,
+                        'facet.mincount': _facetMincount,
+                        'facet.limit': _facetLimit,
+                        'facet.field' : _facetFields,
+                        'd': _spacialdistance,
+                        'sfield': _spacialfield,
+                        'pt': `${_spacialposition.lat},${_spacialposition.lng}`,
+                        'distanceUnits': _distanceUnits                    
+                    }, f),
+                    useQuerystring: true
+                  }
+                )).
+                then(options => this.connector.send(options, this.connector.retryHandler));
     }
 
     /**

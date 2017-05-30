@@ -47,38 +47,39 @@ class Asset {
         let bodyStream = fs.createReadStream(options.filePath);
 
         return Promise.all([
-          this.connector.loginstatus, 
-          fileUtils.getFileSize(options.filePath),
-          hashUtils.generateMD5Hash(hashStream)
-        ]).
-        then(values => Object.assign({}, //(base, fileSize, md5file)
-                this.connector.options,
+                 this.connector.loginstatus, 
+                 fileUtils.getFileSize(options.filePath),
+                 hashUtils.generateMD5Hash(hashStream)
+               ]).
+               then(([baseUrl, fileSize, md5file]) => Object.assign(
+                {}, 
+                this.connector.options, 
                 {
-                    baseUrl: values[0],
-                    uri: `${this.connector.endpoint.uri_resource}${resourceId}`,
-                    method: (_randomId) ? 'POST': 'PUT',
-                    headers: {
-                        'Content-Type': contentType,
-                        'Content-Length': values[1]
-                    },
-                    qs: {
-                        name: path.basename(options.filePath),
-                        md5: values[2]
-                    },
-                    json: false
-                })
-        ).
-        then(options => {
-            return new Promise((resolve, reject) => {
-                let body = '';
-                let request = bodyStream.pipe(rp(options));
-                request.on('data', data => {body += data});
-                request.on('end', () => (body) ? resolve(JSON.parse(body)) : resolve(undefined));
-                request.on('error', reject);
-            });
-        }).
-        catch(value => {console.log('Create ... ', value); return value;}).
-        then(data => data || { id : extractedExtname });
+                  baseUrl: baseUrl,
+                  uri: `${this.connector.endpoint.uri_resource}${resourceId}`,
+                  method: (_randomId) ? 'POST': 'PUT',
+                  headers: {
+                    'Content-Type': contentType,
+                    'Content-Length': fileSize
+                  },
+                  qs: {
+                    name: path.basename(options.filePath),
+                    md5: md5file
+                  },
+                  json: false
+                }
+               )).
+               then(options => {
+                  return new Promise((resolve, reject) => {
+                      let body = '';
+                      let request = bodyStream.pipe(rp(options));
+                      request.on('data', data => {body += data});
+                      request.on('end', () => (body) ? resolve(JSON.parse(body)) : resolve(undefined));
+                      request.on('error', reject);
+                  });
+               }).
+               catch(value => {console.log('Create ... ', value); return value;}).
+               then(data => data || { id : extractedExtname });
     }
 
     /**
@@ -96,21 +97,20 @@ class Asset {
      * @return {Promise} - Resolves when the asset is created
      */
     createAsset(assetDef) {
-        return this.connector.loginstatus.
-        then((base) => Object.assign({},
-            this.connector.options,
-            {
-                baseUrl: base,
-                uri: this.connector.endpoint.uri_assets,
-                method: 'POST',
-                qs: {
+      return this.connector.loginstatus.
+              then(base => (     
+                {
+                  baseUrl: base,
+                  uri: this.connector.endpoint.uri_assets,
+                  method: 'POST',
+                  qs: {
                     analyze: true, // These two parameters define if watson tagging is active...
                     autocurate: false // ... and if all tags are accepted automatically
-                },
-                body: assetDef
-            })
-        ).
-        then(options => this.connector.send(options, this.connector.retryHandler));
+                  },
+                  body: assetDef
+                }
+              )).
+              then(options => this.connector.send(options, this.connector.retryHandler));
     }
 
     /**
@@ -128,20 +128,19 @@ class Asset {
      * @return {Promise} - Resolves when the asset is created
      */
     update(assetDef) {
-        return this.connector.loginstatus.
-        then((base) => Object.assign({},
-            this.connector.options,
-            {
-                baseUrl: base,
-                uri: `${this.connector.endpoint.uri_assets}/${encodeURIComponent(assetDef.id)}`,
-                method: 'PUT',
-                qs: {
+      return this.connector.loginstatus.
+              then(base => (    
+                {
+                  baseUrl: base,
+                  uri: `${this.connector.endpoint.uri_assets}/${encodeURIComponent(assetDef.id)}`,
+                  method: 'PUT',
+                  qs: {
                     analyze: true
-                },
-                body: assetDef
-            })
-        ).
-        then(options => this.connector.send(options, this.connector.retryHandler));
+                  },
+                  body: assetDef
+                }
+              )).
+              then(options => this.connector.send(options, this.connector.retryHandler));
     }
 
     /**
@@ -162,20 +161,20 @@ class Asset {
      * @return {Promise} - Resolves when the asset & resource is created
      */
     upload(options) {
-        return this.createResource(options.resourceDef).
-        then(resourceResp => (typeof resourceResp === 'string') ? JSON.parse(resourceResp) : resourceResp).
-        then(resourceResp => Object.assign(
-            {},
-            options.assetDef,
-            {
-                tags: {
-                    values:   options.assetDef.tags.values.splice(0),
-                    declined: options.assetDef.tags.declined.splice(0),
-                    analysis: options.assetDef.tags.analysis
-                },
-                resource: resourceResp.id
-            })).
-        then(asset => this.createAsset(asset));
+      return this.createResource(options.resourceDef).
+              then(resourceResp => (typeof resourceResp === 'string') ? JSON.parse(resourceResp) : resourceResp).
+              then(resourceResp => Object.assign(
+                  {},
+                  options.assetDef,
+                  {
+                    tags: {
+                      values:   options.assetDef.tags.values.splice(0),
+                      declined: options.assetDef.tags.declined.splice(0),
+                      analysis: options.assetDef.tags.analysis
+                    },
+                    resource: resourceResp.id
+                  })).
+              then(asset => this.createAsset(asset));
     }
 
     /**
@@ -184,19 +183,18 @@ class Asset {
      * @return {Promise} - Resolved after the resource was deleted
      */
     delete(assetId) {
-        return this.connector.loginstatus.
-        then(base => Object.assign({},
-            this.connector.options,
-            {
-                baseUrl: base,
-                uri: this.connector.endpoint.uri_assets+'/'+encodeURIComponent(assetId),
-                method: 'DELETE'
-            })
-        ).
-        then(options => this.connector.send(options, this.connector.retryHandler)).
-        then(() => `Deleted ${assetId} succesfully.`).
-        catch(this.errorLogger).
-        catch(err => `An error occured deleting ${assetId}: Status ${err.statusCode}. Enable debugging for details.`);
+      return this.connector.loginstatus.
+              then(base => (
+                {
+                  baseUrl: base,
+                  uri: this.connector.endpoint.uri_assets+'/'+encodeURIComponent(assetId),
+                  method: 'DELETE'
+                }
+              )).
+              then(options => this.connector.send(options, this.connector.retryHandler)).
+              then(() => `Deleted ${assetId} succesfully.`).
+              catch(this.errorLogger).
+              catch(err => `An error occured deleting ${assetId}: Status ${err.statusCode}. Enable debugging for details.`);
     }
 
     /**

@@ -50,19 +50,18 @@ class Taxonomy {
         } : res => Promise.resolve(res);
 
         return this.connector.loginstatus.
-        then(base => Object.assign({},
-            this.connector.options,
-            {
-              baseUrl: base,
-              uri: `${this.connector.endpoint.uri_categories}/${encodeURIComponent(categoryId)}/children`,
-              method: 'GET',
-              qs: {
-                  recurse: recurse,
-                  limit: limit,
-                  offset: offset
-              }
-            })
-        ).
+        then(base => (
+          {
+            baseUrl: base,
+            uri: `${this.connector.endpoint.uri_categories}/${encodeURIComponent(categoryId)}/children`,
+            method: 'GET',
+            qs: {
+                recurse: recurse,
+                limit: limit,
+                offset: offset
+            }
+          }
+        )).
         then(options => this.connector.send(options, this.connector.retryHandler)).
         then(transform).
         catch(this.connector.errorLogger);
@@ -78,16 +77,16 @@ class Taxonomy {
      */
     createCategory(categoryDef) {
       return this.connector.loginstatus.
-      then(base => Object.assign({},
-          this.connector.options,
-          { 
+        then(base => (
+          {
             baseUrl: base,
             uri: this.connector.endpoint.uri_categories,
             method: 'POST',
             body: categoryDef
-          })).
-      then(options => this.connector.send(options, this.connector.retryHandler)).
-      catch(this.connector.errorLogger);
+          }
+        )).
+        then(options => this.connector.send(options, this.connector.retryHandler)).
+        catch(this.connector.errorLogger);
     }
 
     /**
@@ -101,16 +100,16 @@ class Taxonomy {
      */
     updateCategory(updatedCategoryDef) {
       return this.connector.loginstatus.
-      then(base => Object.assign({},
-          this.connector.options,
+        then(base => (
           { 
             baseUrl: base,
             uri: `${this.connector.endpoint.uri_categories}/${encodeURIComponent(updatedCategoryDef.id)}`,
             method: 'PUT',
             body: updatedCategoryDef
-          })).
-      then(options => this.connector.send(options, this.connector.retryHandler)).
-      catch(this.connector.errorLogger);
+          }
+        )).
+        then(options => this.connector.send(options, this.connector.retryHandler)).
+        catch(this.connector.errorLogger);
     }
 
     /**
@@ -119,15 +118,14 @@ class Taxonomy {
      * @return {Promis} - Resolves when the element is deleted.
      */
     deleteCategory(categoryId) {
-        return this.connector.loginstatus.
-        then(base => Object.assign({},
-            this.connector.options,
+      return this.connector.loginstatus.
+        then(base => (
             { 
               baseUrl: base,
               uri: `${this.connector.endpoint.uri_categories}/${encodeURIComponent(categoryId)}`,
               method: 'DELETE'
-            })
-        ).
+            }
+        )).
         then(options => this.connector.send(options, this.connector.retryHandler)).
         catch(this.connector.errorLogger);
     }
@@ -137,8 +135,9 @@ class Taxonomy {
     createCategoryLvl(taxonomyLvl, categoryMap) {
         let _getname = (obj) => (typeof obj === 'string') ? obj : obj.name;
         return new Promise((resolve, reject) => {
-          Promise.resolve(taxonomyLvl.children).
-          then(children => children.map(child => this.createCategory({name:_getname(child), parent: categoryMap.get(_getname(taxonomyLvl.parent))}))).
+          console.log('taxonomyLvl ', taxonomyLvl);
+          Promise.resolve(taxonomyLvl.childs).
+          then(childs => childs.map(child => this.createCategory({name:_getname(child), parent: categoryMap.get(_getname(taxonomyLvl.parent))}))).
           then(createPromises => resolveall(createPromises)).
           then(categories => categories.map(result => categoryMap.set(result.name, result.id))).
           then(resolve).
@@ -153,7 +152,7 @@ class Taxonomy {
      * @param  {Object} taxonomyLvl - Represents either the root of a taxonomy or a level inisde a taxonomy. Stored inside the taxonomyDefinition.
      * @param  {String} name  - Indicates the start/name of a taxonomy. If name is present the parent attribute will be ignored.
      * @param  {String} parent - Reference to the parent category. Will internally mapped to the category ID.
-     * @param  {Array} children - String Array containing the names of the categories on this level.
+     * @param  {Array} childs - String Array containing the names of the categories on this level.
      * @return {Promise} - Resolves when the taxonomy is completly created.
      */
     createTaxonomies(taxonomyDefinition) {

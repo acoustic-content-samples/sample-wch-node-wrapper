@@ -88,10 +88,10 @@ class WchConnector {
      * @return {Promise} - Waiting for the response
      */
     send(options, retryHandling) {
-        return rp(options).
-            catch(this.errorLogger).
-            catch(err => retryHandling(err).
-            then(() => rp(options)));
+      return rp(Object.assign({}, this.options, options)).
+          catch(this.errorLogger).
+          catch(err => retryHandling(err).
+          then(() => rp(options)));
     }
 
     /**

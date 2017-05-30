@@ -21,7 +21,7 @@ const wchconfig = {
           pwd: env.credentials.pwd // Replace with your password
         }
       };
-
+      
 // Since I'm in the sample directly I directly requre the entry point...
 const wchConnector = require('../../index')(wchconfig); 
 // In your case this changes to:

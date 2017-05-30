@@ -24,17 +24,16 @@ class Content {
      * @return {Promise} - Resolves when the content type is created
      */
     createContentType(typeDefinition) {
-        return this.connector.loginstatus.
-        then(base => Object.assign({},
-            this.connector.options,
-            {
-                baseUrl: base,
-                uri: this.connector.endpoint.uri_types,
-                method: 'POST',
-                body: typeDefinition
-            })
-        ).
-        then(options => this.connector.send(options, this.connector.retryHandler));
+      return this.connector.loginstatus.
+              then(base => (
+                {
+                  baseUrl: base,
+                  uri: this.connector.endpoint.uri_types,
+                  method: 'POST',
+                  body: typeDefinition
+                }
+              )).
+              then(options => this.connector.send(options, this.connector.retryHandler));
     }
 
     /**
@@ -46,17 +45,16 @@ class Content {
      * @return {Promise} - Resolves when the content type is updated
      */
     updateContentType(typeDefinition) {
-        return this.connector.loginstatus.
-        then(base => Object.assign({},
-            this.connector.options,
-            {
-                baseUrl: base,
-                uri: `${this.connector.endpoint.uri_types}/${encodeURIComponent(typeDefinition.id)}`,
-                method: 'PUT',
-                body: typeDefinition
-            })
-        ).
-        then(options => this.connector.send(options, this.connector.retryHandler));
+      return this.connector.loginstatus.
+              then(base => (
+                {
+                  baseUrl: base,
+                  uri: `${this.connector.endpoint.uri_types}/${encodeURIComponent(typeDefinition.id)}`,
+                  method: 'PUT',
+                  body: typeDefinition
+                }
+              )).
+              then(options => this.connector.send(options, this.connector.retryHandler));
     }
 
     /**
@@ -67,18 +65,18 @@ class Content {
     bulkDeleteItems(contentItemIds) {
       if(!contentItemIds || contentItemIds.length === 0) return Promise.resolve('No Id');
       return this.connector.loginstatus.
-        then(base => Object.assign({},
-          this.connector.options, 
-          { baseUrl: base,
-            uri: `${this.connector.endpoint.uri_content}`,
-            method: 'DELETE',
-            qs: {
-              ids: contentItemIds.join(',')
-            }
-          })
-        ).
-        then(options => this.connector.send(options, this.connector.retryHandler)).
-        catch(this.connector.errLogger);
+              then(base => (
+                { 
+                  baseUrl: base,
+                  uri: `${this.connector.endpoint.uri_content}`,
+                  method: 'DELETE',
+                  qs: {
+                    ids: contentItemIds.join(',')
+                  }
+                }
+              )).
+              then(options => this.connector.send(options, this.connector.retryHandler)).
+              catch(this.connector.errLogger);
     }
 
     /**
@@ -104,15 +102,15 @@ class Content {
     deleteTypes(typeid) {
       if(!typeid) return Promise.resolve('No Id');
       return this.connector.loginstatus.
-        then(base => Object.assign({},
-          this.connector.options, 
-          { baseUrl: base,
-            uri: `${this.connector.endpoint.uri_types}/${encodeURIComponent(typeid)}`,
-            method: 'DELETE'
-          })
-        ).
-        then(options => this.connector.send(options, this.connector.retryHandler)).
-        catch(this.connector.errLogger);
+              then(base => (
+                { 
+                  baseUrl: base,
+                  uri: `${this.connector.endpoint.uri_types}/${encodeURIComponent(typeid)}`,
+                  method: 'DELETE'
+                }
+              )).
+              then(options => this.connector.send(options, this.connector.retryHandler)).
+              catch(this.connector.errLogger);
     }
 
     /**
