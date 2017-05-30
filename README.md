@@ -374,23 +374,43 @@ Creating a complete taxonomy is based on a simple json definition file. The defi
 
 Taxonomy Definition:
 ```json
-{ 
-  mycooltesttax: {
-    "parent" : "mycooltesttax", // This will be the first level
-    "childs": ["mycoolcat1", "mycoolcat2", "mycoolcat3"]
-  },
-  {
-    "parent": "mycoolcat1", // This will be a second level
-    "childs": ["mycoolsubcat1"]
-  },
-  {
-    "parent": "mycoolcat3", // This will be a second level
-    "childs": ["mycoolsubcat3"]
-  },
-  {
-    "parent": "mycoolsubcat1", // And this is a third level
-    "childs": ["mycoolsubsubcat1", "mycoolsubsubcat2"]
-  }
+{
+  "mycooltesttax": [ 
+    {
+      "parent": "mycooltesttax",
+      "childs": ["mycoolcat1", "mycoolcat2", "mycoolcat3"]
+    },
+    {
+      "parent": "mycoolcat1",
+      "childs": ["mycoolsubcat1"]
+    },
+    {
+      "parent": "mycoolcat3",
+      "childs": ["mycoolsubcat2"]
+    },
+    {
+      "parent": "mycoolsubcat1",
+      "childs": ["mycoolsubsubcat1", "mycoolsubsubcat2"]
+    }
+  ],
+  "mycoolertesttax": [ 
+    {
+      "parent": "mycoolertesttax",
+      "childs": ["mycoolcat1", "mycoolcat2", "mycoolcat3"]
+    },
+    {
+      "parent": "mycoolcat1",
+      "childs": ["mycoolsubcat1"]
+    },
+    {
+      "parent": "mycoolcat3",
+      "childs": ["mycoolsubcat2"]
+    },
+    {
+      "parent": "mycoolsubcat1",
+      "childs": ["mycoolsubsubcat1", "mycoolsubsubcat2"]
+    }
+  ]
 }
 ```
 
