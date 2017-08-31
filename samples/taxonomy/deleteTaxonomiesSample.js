@@ -26,5 +26,5 @@ const wchConnector = require('../../index')(wchconfig);
 // In your case this changes to:
 // const wchConnector = require('sample-wch-node-connector')(wchconfig);
 
-wchConnector.taxonomy.deleteTaxonomies('name:mycool*').
+wchConnector.taxonomy.deleteTaxonomies('name:(mytestTax testTax)').
 then(console.log);

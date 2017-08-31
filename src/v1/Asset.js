@@ -42,7 +42,6 @@ class Asset {
         // Be aware that resources are the binary representation of an asset. Hence these resources
         // can get rather large in size. That's why this part is implemented as a stream in order to reduce
         // the memory footprint of this node sample app.
-
         let hashStream = fs.createReadStream(options.filePath);
         let bodyStream = fs.createReadStream(options.filePath);
 

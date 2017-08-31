@@ -51,4 +51,5 @@ function writeFile(objTax) {
 
 wchConnector.taxonomy.updateTaxonomies(taxonomyDef).
 then(writeFile).
+then(objTax => JSON.stringify(objTax, null, 1)).
 then(console.log);

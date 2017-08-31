@@ -1,24 +1,8 @@
 {
- "mycoolertesttax": [
+ "mytestTax": [
   {
    "parent": {
-    "name": "mycoolsubcat1",
-    "id": "d955af43946626b22420e562ba0f4b9f"
-   },
-   "children": [
-    {
-     "name": "mycoolsubsubcat2",
-     "id": "154cbb54d0fec51f0e016c0cb0fa8090"
-    },
-    {
-     "name": "mycoolsubsubcat1",
-     "id": "e152fe15128e5128b939da7cab1669da"
-    }
-   ]
-  },
-  {
-   "parent": {
-    "name": "mycoolertesttax",
+    "name": "mytestTax",
     "id": "154cbb54d0fec51f0e016c0cb0fa6e52"
    },
    "children": [
@@ -59,12 +43,28 @@
      "id": "ddefc2d0b9e86dc306f9c54c04ff8ce8"
     }
    ]
-  }
- ],
- "mycooltesttax": [
+  },
   {
    "parent": {
-    "name": "mycooltesttax",
+    "name": "mycoolsubcat1",
+    "id": "d955af43946626b22420e562ba0f4b9f"
+   },
+   "children": [
+    {
+     "name": "mycoolsubsubcat2",
+     "id": "154cbb54d0fec51f0e016c0cb0fa8090"
+    },
+    {
+     "name": "mycoolsubsubcat1",
+     "id": "e152fe15128e5128b939da7cab1669da"
+    }
+   ]
+  }
+ ],
+ "testTax": [
+  {
+   "parent": {
+    "name": "testTax",
     "id": "e152fe15128e5128b939da7cab1631cc"
    },
    "children": [
@@ -79,22 +79,6 @@
     {
      "name": "mycoolcat1",
      "id": "ddefc2d0b9e86dc306f9c54c04ff8641"
-    }
-   ]
-  },
-  {
-   "parent": {
-    "name": "mycoolsubcat1",
-    "id": "e152fe15128e5128b939da7cab1652db"
-   },
-   "children": [
-    {
-     "name": "mycoolsubsubcat1",
-     "id": "6e4827e8e902ad7f810cb8c2a51902e4"
-    },
-    {
-     "name": "mycoolsubsubcat2",
-     "id": "ddefc2d0b9e86dc306f9c54c04ff98e6"
     }
    ]
   },
@@ -119,6 +103,22 @@
     {
      "name": "mycoolsubcat2",
      "id": "e152fe15128e5128b939da7cab166593"
+    }
+   ]
+  },
+  {
+   "parent": {
+    "name": "mycoolsubcat1",
+    "id": "e152fe15128e5128b939da7cab1652db"
+   },
+   "children": [
+    {
+     "name": "mycoolsubsubcat1",
+     "id": "6e4827e8e902ad7f810cb8c2a51902e4"
+    },
+    {
+     "name": "mycoolsubsubcat2",
+     "id": "ddefc2d0b9e86dc306f9c54c04ff98e6"
     }
    ]
   }

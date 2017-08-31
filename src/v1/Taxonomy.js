@@ -10,7 +10,9 @@
 
 'use strict';
 
+const debug = require('debug')('wchwrapper:Taxonomy');
 const resolveall = promiseMap => new Promise((res, rej) => Promise.all(promiseMap).then(res).catch(rej)); 
+const debugPromise = input => {debug(input); return input};
 
 class Taxonomy {
     constructor({wchConnector}){
@@ -29,12 +31,18 @@ class Taxonomy {
      * @return {Promse} - Resolves when the category tree was retrieved.
      */
     getCategoryTree(categoryId, config) {
+        debug('getCategoryTree(%s, %o)', categoryId, config)
         let _config = config || {};
         let recurse = _config.recurse || true;
         let limit = _config.limit || 100;
         let offset = _config.offset || 0;
         let transform = (_config.simple) ? (res) => {
+          debug('Transform Category Tree Result: %o', res);
           return new Promise((resolve, reject) => {
+            debug('Amount of children ', res.items.length);
+            if(res.items.length === 0) {
+              return resolve([]);
+            }
             let transformedTax = new Map();
             let taxonomyName = res.items[0].namePath[0];
             res.items.forEach((item) => {
@@ -50,21 +58,24 @@ class Taxonomy {
         } : res => Promise.resolve(res);
 
         return this.connector.loginstatus.
-        then(base => (
-          {
-            baseUrl: base,
-            uri: `${this.connector.endpoint.uri_categories}/${encodeURIComponent(categoryId)}/children`,
-            method: 'GET',
-            qs: {
-                recurse: recurse,
-                limit: limit,
-                offset: offset
+          catch(this.connector.errorLogger).
+          then(base => (
+            {
+              baseUrl: base,
+              uri: `${this.connector.endpoint.uri_categories}/${encodeURIComponent(categoryId)}/children`,
+              method: 'GET',
+              qs: {
+                  recurse: recurse,
+                  limit: limit,
+                  offset: offset
+              }
             }
-          }
-        )).
-        then(options => this.connector.send(options, this.connector.retryHandler)).
-        then(transform).
-        catch(this.connector.errorLogger);
+          )).
+          catch(this.connector.errorLogger).
+          then(options => this.connector.send(options, this.connector.retryHandler)).
+          catch(this.connector.errorLogger).
+          then(transform).
+          catch(this.connector.errorLogger);
     }
 
     /**
@@ -76,7 +87,9 @@ class Taxonomy {
      * @return {Promise} - Resolves when the category was created
      */
     createCategory(categoryDef) {
+      debug('Enter createCategory(%o)', categoryDef);
       return this.connector.loginstatus.
+        catch(this.connector.errorLogger).
         then(base => (
           {
             baseUrl: base,
@@ -85,6 +98,7 @@ class Taxonomy {
             body: categoryDef
           }
         )).
+        catch(this.connector.errorLogger).
         then(options => this.connector.send(options, this.connector.retryHandler)).
         catch(this.connector.errorLogger);
     }
@@ -133,16 +147,21 @@ class Taxonomy {
     /* Convinience method to create taxonomies. Since taxonomies are reliying on a 'strict' parent child relation ship. We have to ensure
     that the parent category was created before the child categories. */
     createCategoryLvl(taxonomyLvl, categoryMap) {
-        let _getname = (obj) => (typeof obj === 'string') ? obj : obj.name;
-        return new Promise((resolve, reject) => {
-          console.log('taxonomyLvl ', taxonomyLvl);
-          Promise.resolve(taxonomyLvl.childs).
-          then(childs => childs.map(child => this.createCategory({name:_getname(child), parent: categoryMap.get(_getname(taxonomyLvl.parent))}))).
-          then(createPromises => resolveall(createPromises)).
-          then(categories => categories.map(result => categoryMap.set(result.name, result.id))).
-          then(resolve).
-          catch(reject);
-        });
+      debug('Enter createCategoryLvl(%o, %o)', taxonomyLvl, categoryMap);
+      let _getname = (obj) => (typeof obj === 'string') ? obj : obj.name;
+      return new Promise((resolve, reject) => {
+        debug('taxonomyLvl %o', taxonomyLvl);
+        Promise.resolve(taxonomyLvl.children).
+        catch(this.connector.errorLogger).
+        then(childs => childs.map(child => this.createCategory({name:_getname(child), parent: categoryMap.get(_getname(taxonomyLvl.parent))}))).
+        catch(this.connector.errorLogger).
+        then(createPromises => resolveall(createPromises)).
+        catch(this.connector.errorLogger).
+        then(categories => categories.map(result => {debug('result %o', result);return categoryMap.set(result.name, result.id);})).
+        catch(this.connector.errorLogger).
+        then(resolve).
+        catch(reject);
+      });
     }
 
     /**
@@ -156,18 +175,31 @@ class Taxonomy {
      * @return {Promise} - Resolves when the taxonomy is completly created.
      */
     createTaxonomies(taxonomyDefinition) {
+      debug('Enter createTaxonomies(%o)', taxonomyDefinition)
       let taxonomiesMap = {};
       return Promise.resolve(Object.keys(taxonomyDefinition)).
-      then(taxonomyKeys => {
-        return resolveall(taxonomyKeys.map(key => {
-          taxonomiesMap[key] = new Map();
-          return this.createCategory({name:key}).
-          then(result => taxonomiesMap[key].set(key, result.id)).
-          then(() => taxonomyDefinition[key].reduce((p, taxonomyLvl) => p.then(() => this.createCategoryLvl(taxonomyLvl, taxonomiesMap[key])), Promise.resolve()));
-        }));
-      }).
-      catch(this.connector.errorLogger).
-      then(() => taxonomiesMap);
+        catch(this.connector.errorLogger).
+        then(taxonomyKeys => {
+          return resolveall(taxonomyKeys.map(key => {
+            taxonomiesMap[key] = new Map();
+            return this.createCategory({name:key}).
+              catch(this.connector.errorLogger).
+              then(result => {
+                debug('Taxonomy Root %o', result.id);
+                taxonomiesMap[key].set(key, result.id)
+                debug('taxonomiesMap Root %o', taxonomiesMap);
+                return taxonomiesMap[key].set(key, result.id);
+              }).
+              catch(this.connector.errorLogger).
+              then(() => taxonomyDefinition[key].reduce((p, taxonomyLvl) => p.then(() => this.createCategoryLvl(taxonomyLvl, taxonomiesMap[key])), Promise.resolve())).
+              catch(this.connector.errorLogger);
+          }));
+        }).
+        catch(this.connector.errorLogger).
+        then(() => {
+          debug('Created all taxonomies %o', taxonomiesMap); 
+          return taxonomiesMap
+        });
     }
 
     /**
@@ -178,66 +210,92 @@ class Taxonomy {
      * @return {Promise} - Returns the updated taxonomy definition with all potential new ids for new categories.
      */
     updateTaxonomies(newTaxonomyDefinitions) {
+      debug('Enter updateTaxonomies %o', newTaxonomyDefinitions);
       let taxonomies = Object.keys(newTaxonomyDefinitions);
       let taxQuery = `name:${taxonomies.join(' OR name:')}`;
+      debug('Taxonomy Query %o', taxQuery);
       return this.getTaxonomies({facetquery: taxQuery}, {simple:true}).
         then(currentTaxonomies => {
+          debug('Current Taxonomies %o', currentTaxonomies);
           return new Promise((resolve, reject) => {
             let openTaxonomies = taxonomies.map(key => {
               return new Promise((resolve, reject) => {
                 let newIdMap = new Map();
                 let currentTax = currentTaxonomies[key];
-                let newTax = newTaxonomyDefinitions[key];
+                debug('Current Taxonomy: %o',currentTax);
+                
+                if(currentTax) {
+                  let newTax = newTaxonomyDefinitions[key];
 
-                let openCatlevels = newTax.reduce((p, newCategoryLvl) => {
-                  return p.then(() => {return new Promise((resolve, reject) => {
-                      if (!newCategoryLvl.children) resolve();
-                      let {id : parentid , name :parentname } = newCategoryLvl.parent;
-                      if(!parentid || parentid === null || newIdMap.has(parentname)) {
-                        parentid=newIdMap.get(parentname);
-                        newCategoryLvl.parent.id=parentid;
-                      }
-                      let currCategoryLvl = currentTax.find((element) => element.parent.id && element.parent.id===parentid);
-                      let openChilds = newCategoryLvl.children.map((child, indx) => {
-                        return new Promise((resolve, reject) => {
+                  let openCatlevels = newTax.reduce((p, newCategoryLvl) => {
+                    return p.then(() => {return new Promise((resolve, reject) => {
+                        debug('handle newCategoryLvl %o', newCategoryLvl);
+                        if (!newCategoryLvl.children) resolve();
+                        let {id: parentid , name: parentname } = newCategoryLvl.parent;
+                        if(!parentid || parentid === null || newIdMap.has(parentname)) {
+                          parentid=newIdMap.get(parentname);
+                          newCategoryLvl.parent.id=parentid;
+                        }
+                        debug('parentId %o', parentid);
+                        let currCategoryLvl = currentTax.find((element) => {debug(element.parent.id); return element.parent.id && element.parent.id===parentid});
+                        debug('currCategoryLvl %o', currCategoryLvl);
+                        let openChilds = newCategoryLvl.children.map((child, indx) => {
+                          return new Promise((resolve, reject) => {
+                            debug('newCategory child %o', child);
+                            let {name, id} = child;
 
-                          let {name, id} = child;
-
-                          let currChildId = (currCategoryLvl) ? currCategoryLvl.children.find((element) => element.id && element.id===id):undefined;
-                          let currChildName = (currCategoryLvl) ? currCategoryLvl.children.find((element) => element.name && element.name===name):undefined;
-
-                          if(!currChildId && currChildName) {
-                            let currChildName = (currCategoryLvl) ? currCategoryLvl.children.find((element) => element.name && element.name===name):undefined;
-                            newCategoryLvl.children[indx].id = currChildName.id; 
-                            newIdMap.set(currChildName.name, currChildName.id);
-                            resolve();
-                          } else if(!currChildId && !currChildName) {
-                            this.createCategory({name, parent: parentid}).
-                            then(result => {newCategoryLvl.children[indx].id = result.id; newIdMap.set(result.name, result.id)}).
-                            catch(reject).
-                            then(resolve);
-                          } else if(name !== currChildId.name) {
-                            newIdMap.set(name, id);
-                            this.updateCategory({name, id, parent: parentid}).
-                            catch(reject).
-                            then(resolve);
-                          } else {
-                            resolve();
-                          }
+                            let currChildId = (currCategoryLvl) ? currCategoryLvl.children.find(element => element.id && element.id === id) : undefined;
+                            let currChildName = (currCategoryLvl) ? currCategoryLvl.children.find(element => element.name && element.name === name) : undefined;
+                            debug('currChildId %o', currChildId);
+                            debug('currChildName %o', currChildName);
+                            if(!currChildId && currChildName) {
+                              let currChildName = (currCategoryLvl) ? currCategoryLvl.children.find(element => element.name && element.name === name) : undefined;
+                              newCategoryLvl.children[indx].id = currChildName.id; 
+                              newIdMap.set(currChildName.name, currChildName.id);
+                              resolve();
+                            } else if(!currChildId && !currChildName) {
+                              this.createCategory({name, parent: parentid}).
+                              then(result => {newCategoryLvl.children[indx].id = result.id; newIdMap.set(result.name, result.id)}).
+                              catch(reject).
+                              then(resolve);
+                            } else if(name !== currChildId.name) {
+                              newIdMap.set(name, id);
+                              this.updateCategory({name, id, parent: parentid}).
+                              catch(reject).
+                              then(resolve);
+                            } else {
+                              resolve();
+                            }
+                          });
                         });
+                        
+                        resolveall(openChilds).
+                        catch(reject).
+                        then(resolve);
+
                       });
-                      
-                      resolveall(openChilds).
-                      catch(reject).
-                      then(resolve);
-
                     });
-                  });
-                }, Promise.resolve());
+                  }, Promise.resolve());
+                
+                  openCatlevels.
+                  catch(reject).
+                  then(resolve);
+                } else {
+                  debug('No current Taxonomy...');
+                  this.createTaxonomies({[key]:newTaxonomyDefinitions[key]}).
+                  catch(reject).
+                  then(resultMap => {
+                    debug('Result new Taxonomy Id Map %o', resultMap);
+                    newTaxonomyDefinitions[key].forEach(taxLevel => {
+                      taxLevel.parent.id = resultMap[key].get(taxLevel.parent.name);
+                      taxLevel.children.forEach(child => {
+                        child.id = resultMap[key].get(child.name);
+                      });
+                    });
+                  }).
+                  then(resolve);
+                }
 
-                openCatlevels.
-                catch(reject).
-                then(resolve);
               });
             });
 
@@ -271,11 +329,20 @@ class Taxonomy {
      * @return {Promise} Resolves with a complete taxonomy tree.
      */
     getTaxonomies(query, taxconfig) {
+      debug('Enter getTaxonomies(%o, %o)', query, taxconfig);
       return this.connector.search.taxonomies(query).
+        catch(this.connector.errorLogger).
+        then(result => {debug('Found taxonomies: %o', result); return result;}).
+        catch(this.connector.errorLogger).
         then(data => (data.documents) ? data.documents : []).
+        catch(this.connector.errorLogger).
         then(documents => documents.map(document => (document.id.startsWith('taxonomy:')) ? document.id.substring('taxonomy:'.length) : document.id)).
+        catch(this.connector.errorLogger).
         then(idset => resolveall(idset.map(taxid => this.getCategoryTree(taxid, taxconfig)))).
+        catch(this.connector.errorLogger).
         then(resultset => resultset.reduce((result, taxonomy) => Object.assign(result, taxonomy), {})).
+        catch(this.connector.errorLogger).
+        then(result => {debug('Leave getTaxonomies() --> %o', result); return result;}).
         catch(this.connector.errorLogger);
     }
 

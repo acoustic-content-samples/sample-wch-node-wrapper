@@ -10,10 +10,11 @@
     "test": "mocha"
   },
   "dependencies": {
-    "mime-types": "^2.1.12",
+    "debug": "^3.0.1",
+    "mime-types": "^2.1.16",
     "promise-queue": "^2.2.3",
-    "request-promise-native": "^1.0.3",
-    "request": "^2.34"
+    "request": "^2.34",
+    "request-promise-native": "^1.0.3"
   },
   "devDependencies": {
     "eslint": "^3.18.0",
