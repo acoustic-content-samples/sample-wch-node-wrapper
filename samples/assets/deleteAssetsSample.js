@@ -27,5 +27,5 @@ const wchConnector = require('../../index')(wchconfig);
 // In your case this changes to:
 // const wchConnector = require('sample-wch-node-connector')(wchconfig);
 
-wchConnector.asset.deleteAssets('isManaged:true AND name:"Upload Asset Sample"', 2).
+wchConnector.asset.deleteAssets('name:*NoAudio* AND classification:asset', 500).
 then(console.log);
