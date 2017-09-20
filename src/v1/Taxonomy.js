@@ -236,8 +236,15 @@ class Taxonomy {
                           parentid=newIdMap.get(parentname);
                           newCategoryLvl.parent.id=parentid;
                         }
-                        debug('parentId %o', parentid);
-                        let currCategoryLvl = currentTax.find((element) => {debug(element.parent.id); return element.parent.id && element.parent.id===parentid});
+                        debug('parentname: %o, parentid: %o', parentname, parentid);
+
+                        // First try to identify the current level by its parent id
+                        let currCategoryLvl = currentTax.find(element => element.parent && element.parent.id===parentid);
+                        if (!currCategoryLvl) {
+                          debug('Match by name');
+                          currCategoryLvl = currentTax.find(element => element.parent && element.parent.name === parentname);
+                        }
+
                         debug('currCategoryLvl %o', currCategoryLvl);
                         let openChilds = newCategoryLvl.children.map((child, indx) => {
                           return new Promise((resolve, reject) => {
