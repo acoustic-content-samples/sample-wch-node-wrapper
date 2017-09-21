@@ -1,6 +1,6 @@
 {
   "name": "sample-wch-node-wrapper",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "private": false,
   "main": "index.js",
   "license": "Apache-2.0",
