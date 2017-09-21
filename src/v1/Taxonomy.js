@@ -214,7 +214,7 @@ class Taxonomy {
       let taxonomies = Object.keys(newTaxonomyDefinitions);
       let taxQuery = `name:${taxonomies.join(' OR name:')}`;
       debug('Taxonomy Query %o', taxQuery);
-      return this.getTaxonomies({facetquery: taxQuery}, {simple:true}).
+      return this.getTaxonomies({facetquery: taxQuery}, {simple:true, limit: 999999}).
         then(currentTaxonomies => {
           debug('Current Taxonomies %o', currentTaxonomies);
           return new Promise((resolve, reject) => {
@@ -243,6 +243,11 @@ class Taxonomy {
                         if (!currCategoryLvl) {
                           debug('Match by name');
                           currCategoryLvl = currentTax.find(element => element.parent && element.parent.name === parentname);
+                          if(currCategoryLvl && currCategoryLvl.parent && currCategoryLvl.parent.id !== null && parentid !== currCategoryLvl.parent.id) {
+                            debug('MISSMATCH ', currCategoryLvl);
+                            newIdMap.set(currCategoryLvl.parent.name, currCategoryLvl.parent.id);
+                            parentid = currCategoryLvl.parent.id;
+                          }
                         }
 
                         debug('currCategoryLvl %o', currCategoryLvl);
