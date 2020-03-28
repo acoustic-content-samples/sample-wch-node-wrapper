@@ -1,5 +1,5 @@
 # sample-wch-node-wrapper
-Node js wrapper around the Watson Content Hub APIs. Coverage will slowly increase. At the moment the authoring APIs are the main focus of this sample. The sample code is well documented and provides you with further details on how to use the connector in your own node project. (Besides it's always a good idea to have a look at the code :) ).
+Node js wrapper around the Acoustic Content (formerly Watson Content Hub) APIs. Coverage will slowly increase. At the moment the authoring APIs are the main focus of this sample. The sample code is well documented and provides you with further details on how to use the connector in your own node project. (Besides it's always a good idea to have a look at the code :) ).
 
 ## How to get started
 Install it via npm:
