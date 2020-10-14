@@ -24,7 +24,7 @@ const wchWrapper = require('sample-wch-node-wrapper')({
         maxSockets: 10
       });
 ```
-- `baseUrl` - [Required] The base URL for the WCH API calls in anonymous use cases. Be aware that after a succesful login the base URL might change based on the login response. For details have a look at the login section. Defaults to https://my.digitalexperience.ibm.com/api.
+- `baseUrl` - [Required] The base URL for the WCH API calls in anonymous use cases. Be aware that after a succesful login the base URL might change based on the login response. For details have a look at the login section. Defaults to https://content-us-1.content-cms.com/api.
 - `tenantid` - [Optional] The tenantid of your WCH account. You find the tenantid in the authoring UI after login. Simply click on the info button you'll find on the top left.
 - `endpoint` - [Optional] Choose the api endpoint. The connector either interacts with content in the authoring environment ('authoring') or with delivered content ready for production use cases ('delivery'). Default is 'delivery'.
 - `credentials` - [Optional] Used to authenticate towards content hub. You always have to pass in your credential when choosing the authoring endpoint. Per Default you get anonymous access to the delivery endpoint.
@@ -65,7 +65,7 @@ When providing the connector with your credentials this method is called automat
 The GET path is based around basic authentication. Make sure to encode your username and password in the authorization header.
 
 ```http
-GET https://my[0-9][0-9].digitalexperience.ibm.com/api/<tenantid>/login/v1/basicauth
+GET https://content-[(us)(eu)]{2}-[1-9].content-cms.com/api/<tenantid>/login/v1/basicauth
 Headers:
   Authorization: Basic Base64[USERNAME:PASSWORD]
 ```
@@ -75,7 +75,7 @@ Headers:
 The POST path requires no headers but instead you send your credentials in the body which has to be application/x-www-form-urlencoded. This approach could be a nice fit for form based logins.
 
 ```http
-POST https://my[0-9][0-9].digitalexperience.ibm.com/api/<tenantid>/login/v1/basicauth
+POST https://content-[(us)(eu)]{2}-[1-9].content-cms.com/api/<tenantid>/login/v1/basicauth
 Headers:
   Content-Type: application/x-www-form-urlencoded
 Body:

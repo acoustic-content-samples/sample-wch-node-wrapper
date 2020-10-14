@@ -20,7 +20,7 @@ const fs = require('fs');
 const env = require('../.env');
 const authSDK = require('../index')({
         endpoint: 'authoring',
-        // baseUrl: 'https://www.digitalexperience.ibm.com/api/81963bce-85ad-4ef9-9c41-5a76eeba6f59',
+        // baseUrl: 'https://www.content-us-1.content-cms.com/api/81963bce-85ad-4ef9-9c41-5a76eeba6f59',
         // tenantid: env.credentials.tenantid,
         credentials: {
           usrname: env.credentials.usrname,
